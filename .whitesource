@@ -1,0 +1,23 @@
+{
+  "settingsInheritedFrom": "whitesource-config/whitesource-config@master",
+  "scanSettings": {
+  "configMode": "LOCAL",
+  "enableIaC": true,
+  "scanPullRequests": true,
+  "incrementalScan": true
+  },
+  "iacSettings": {
+    "ignoreRules": [
+      "DOCKERFILE_BASE_IMAGE_LATEST",
+      "DOCKERFILE_SUDO_USED"
+    ]
+  },
+  "remediateSettings": {
+    "workflowRules": {
+        "enabled": true
+    },
+    "transitiveRemediation": true,
+    "enableRenovate": true,
+    "extends": ["config:recommended"]
+  }
+}
