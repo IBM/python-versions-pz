@@ -1,0 +1,59 @@
+name: Merge Manifest
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  merge-manifest:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: main-manifest-merge
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+
+      - name: Fetch and pull with rebase
+        run: |
+          git fetch --all
+          git pull --rebase
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install poetry
+          poetry install --no-interaction --no-ansi
+
+      - name: Download upstream versions-manifest.json
+        run: |
+          curl -sSL -o versions-manifest.json "https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json"
+
+      - name: Merge all arch-specific manifests into main manifest
+        run: |
+          for manifest_file in versions-manifests/*.json; do
+            if [ -f "$manifest_file" ]; then
+              echo "Merging $manifest_file into versions-manifest.json"
+              poetry run python .github/scripts/manifest_tools.py merge versions-manifest.json "$manifest_file" versions-manifest.json
+            fi
+          done
+
+
+      - name: Set git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push main manifest
+        run: |
+          git add versions-manifest.json
+          git commit -m "Update main manifest [skip ci]" || echo "No changes to commit"
+          git push

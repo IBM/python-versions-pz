@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "actions-python-arch-builds"
+version = "0.1.0"
+description = "Automates building and release of CPython tarballs for ppc64le and s390x architectures for GitHub Actions runners."
+authors = ["Adilhusain Shaikh <Adilhusain.Shaikh@ibm.com>", "Your Name or Organization"]
+license = "Apache-2.0"
+readme = "README.md"
+package-mode = false
+
+classifiers = [
+	"License :: OSI Approved :: Apache Software License",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Intended Audience :: Developers",
+	"Topic :: Software Development :: Build Tools"
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+requests = ">=2.32.5"
+typer = ">=0.19.2"
+pydantic = ">=2.11.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

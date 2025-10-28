@@ -1,0 +1,41 @@
+permissions:
+  contents: read
+# .github/workflows/python-sample.yml
+name: Run Python Sample (ppc64le, s390x)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-python-sample:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-ppc64le
+            arch: ppc64le
+	  - os: ubuntu-24.04-s390x
+	    arch: s390x
+          - os: ubuntu-latest
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: adilhusain-s/setup-python@main
+        with:
+          python-version: 3.13.4
+          architecture: ${{ matrix.arch }}
+      
+      - name: Test Python installation
+        run: |
+          python --version
+          which python
+          python -c "import sys; print('Python executable:', sys.executable)"
+          python -c "import platform; print('Platform:', platform.platform())"
+          python -c "import site; print('Site packages:', site.getsitepackages())"
+          python -m pip --version
+          python -c "import ssl; print('SSL available:', ssl.OPENSSL_VERSION)"
+          python -c "import ctypes; print('ctypes available:', hasattr(__import__('ctypes'), 'CDLL'))"
+          python -c "print('Basic math:', 2 + 2)"

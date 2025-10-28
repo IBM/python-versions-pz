@@ -1,0 +1,205 @@
+name: Generate PowerShell Tar
+# This workflow intentionally does not use workflow_dispatch inputs to comply with policy.
+# To specify a custom PowerShell tag, create a one-line file at
+# .github/release/powershell-tag-override.txt (e.g., v7.5.2). If absent, uses default v7.5.2.
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - "**"
+
+jobs:
+  generate-tar:
+    name: Generate PowerShell Tar on x64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine PowerShell tag to use
+        id: get_tag
+        run: |
+          # Optional file-based override to keep functionality without inputs
+          override_file=".github/release/powershell-tag-override.txt"
+          default_tag="v7.5.2"
+          
+          if [ -f "$override_file" ]; then
+            override_tag=$(sed -n '1p' "$override_file" | tr -d '\r')
+            if [ -n "$override_tag" ]; then
+              echo "Found override tag in $override_file: $override_tag"
+              echo "pwsh_tag=$override_tag" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          
+          echo "Using default tag: $default_tag"
+          echo "pwsh_tag=$default_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Clone PowerShell repository
+        run: |
+          git clone https://github.com/PowerShell/PowerShell.git pwsh-src
+          cd pwsh-src
+          git checkout ${{ steps.get_tag.outputs.pwsh_tag }}
+
+      - name: Import build.psm1 and run commands
+        shell: pwsh
+        run: |
+          Import-Module ./pwsh-src/build.psm1
+          Start-PSBootstrap -Scenario dotnet
+          Start-ResGen
+          Start-TypeGen
+
+      - name: Copy archive script to pwsh-src
+        run: cp PowerShell/archive-non-repo.sh pwsh-src/
+
+      - name: Archive resource and type definitions using script
+        shell: bash
+        run: |
+          cd pwsh-src
+          chmod +x archive-non-repo.sh
+          ./archive-non-repo.sh
+          mv ../powershell-gen.tar.gz .
+
+      - name: Fail if archive is missing
+        shell: bash
+        run: |
+          if [ ! -f pwsh-src/powershell-gen.tar.gz ]; then
+            echo 'powershell-gen.tar.gz not found!' >&2
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-gen-tar
+          path: pwsh-src/powershell-gen.tar.gz
+
+  extract-tar:
+    needs: generate-tar
+    name: Extract PowerShell Tar on different architecture
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: powershell-gen-tar
+          path: ./downloaded-tar
+
+      - name: Determine PowerShell tag to use
+        id: get_tag_extract
+        run: |
+          # Optional file-based override to keep functionality without inputs
+          override_file=".github/release/powershell-tag-override.txt"
+          default_tag="v7.5.2"
+          
+          if [ -f "$override_file" ]; then
+            override_tag=$(sed -n '1p' "$override_file" | tr -d '\r')
+            if [ -n "$override_tag" ]; then
+              echo "Found override tag in $override_file: $override_tag"
+              echo "pwsh_tag=$override_tag" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          
+          echo "Using default tag: $default_tag"
+          echo "pwsh_tag=$default_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Clone PowerShell repository
+        run: |
+          git clone https://github.com/PowerShell/PowerShell.git pwsh-src
+          cd pwsh-src
+          git checkout ${{ steps.get_tag_extract.outputs.pwsh_tag }}
+
+      - name: Extract archive into PowerShell repo
+        run: |
+          tar -xzvf downloaded-tar/powershell-gen.tar.gz -C pwsh-src
+
+      - name: Detect dotnet SDK version from global.json
+        id: detect-sdk
+        run: |
+          sdk_version=$(jq -r '.sdk.version' pwsh-src/global.json)
+          echo "Detected SDK version: $sdk_version"
+          echo "sdk_version=$sdk_version" >> $GITHUB_OUTPUT
+
+      - name: Install detected dotnet SDK version
+        run: |
+          curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+          chmod +x dotnet-install.sh
+          ./dotnet-install.sh --version ${{ steps.detect-sdk.outputs.sdk_version }} --install-dir $HOME/.dotnet
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+
+      - name: Set .NET RuntimeIdentifier
+        id: set-runtime
+        run: |
+          arch=$(uname -m)
+          case "$arch" in
+            x86_64) rid_arch="x64" ;;
+            aarch64) rid_arch="arm64" ;;
+            armv7l) rid_arch="arm" ;;
+            *) echo "Unsupported architecture: $arch" >&2; exit 1 ;;
+          esac
+          echo "rid_arch=$rid_arch" >> $GITHUB_OUTPUT
+
+      - name: Build PowerShell with dotnet
+        run: |
+          cd pwsh-src/src/powershell-unix
+          $HOME/.dotnet/dotnet restore --source https://api.nuget.org/v3/index.json
+          $HOME/.dotnet/dotnet publish . \
+            -p:GenerateFullPaths=true \
+            -p:ErrorOnDuplicatePublishOutputFiles=false \
+            -p:IsWindows=false \
+            -p:PublishReadyToRun=false \
+            -p:WarnAsError=false \
+            -p:RunAnalyzers=false \
+            -p:SDKToUse=Microsoft.NET.Sdk \
+            --self-contained \
+            --configuration Release \
+            --framework net$($HOME/.dotnet/dotnet --version | cut -d. -f1,2) \
+            --runtime linux-${{ steps.set-runtime.outputs.rid_arch }}
+
+      - name: Debug list files before move
+        run: |
+          echo "Current Directory: $(pwd)"
+          echo "Listing downloaded-tar contents:"
+          ls -l downloaded-tar
+
+          echo "Listing PowerShell/patch directory:"
+          ls -l PowerShell/patch || echo "PowerShell/patch does not exist!"
+
+      - name: Move downloaded tar to PowerShell/patch with versioned name
+        run: |
+          pwsh_tag="${{ steps.get_tag_extract.outputs.pwsh_tag }}"
+          version="${pwsh_tag#v}"
+
+          if [ ! -d PowerShell/patch ]; then
+            echo "Error: PowerShell/patch directory does not exist. Did you forget to checkout?" >&2
+            exit 1
+          fi
+
+          mv downloaded-tar/powershell-gen.tar.gz PowerShell/patch/powershell-gen-v${version}.tar.gz
+
+          echo "Post-move PowerShell/patch contents:"
+          ls -l PowerShell/patch
+
+      - name: Commit and push new tar if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add PowerShell/patch/powershell-gen-v*.tar.gz
+          if ! git diff --cached --quiet; then
+            git commit -m "Add/update powershell-gen tar for ${{ steps.get_tag_extract.outputs.pwsh_tag }}"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:${GITHUB_REF#refs/heads/}
+          else
+            echo "No changes to commit."
+          fi

@@ -1,0 +1,95 @@
+name: Release Matching Python Tags
+# This workflow intentionally does not use workflow_dispatch inputs to comply with policy.
+# To control which tags to release, create a one-line file at
+# .github/release/python-tag-filter.txt (e.g., 3.13.*). If absent/empty, it
+# derives a filter from the latest version (e.g., 3.13.*).
+
+on:
+  # Inputs must be empty to comply with policy
+  workflow_dispatch: {}
+
+permissions:
+  contents: read     # Required for checkout and reading repository content
+  actions: write     # Required for calling reusable workflows
+
+jobs:
+  get-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      tags_json: ${{ steps.collect.outputs.tags_json }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install poetry
+          poetry install --no-interaction --no-ansi
+
+      - name: Get Python tags matching filter
+        id: collect
+        run: |
+          # Optional file-based filter override to keep functionality without inputs
+          filter_file=".github/release/python-tag-filter.txt"
+          if [ -f "$filter_file" ]; then
+            FILTER=$(sed -n '1p' "$filter_file" | tr -d '\r')
+            if [ -n "$FILTER" ]; then
+              echo "Using filter from $filter_file: $FILTER"
+            else
+              unset FILTER
+            fi
+          fi
+
+          if [ -z "${FILTER:-}" ]; then
+            LATEST=$(poetry run python .github/scripts/get_python_version.py --latest)
+            echo "No filter supplied, fetched latest tag: $LATEST"
+            # Convert latest version like 3.13.3 to 3.13.*
+            FILTER=$(echo "$LATEST" | sed -E 's/\.[0-9]+$/.*/')
+            echo "Derived filter: $FILTER"
+          fi
+
+          TAGS=$(poetry run python .github/scripts/get_python_version.py --list --filter "$FILTER")
+          echo "Raw tags found:"
+          echo "$TAGS"
+
+          TAGS_JSON=$(echo "$TAGS" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "Tags JSON for matrix:"
+          echo "$TAGS_JSON"
+
+          echo "tags_json=$TAGS_JSON" >> "$GITHUB_OUTPUT"
+
+  build-and-release-matrix:
+    needs: get-tags
+    strategy:
+      matrix:
+        tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
+        platform-version: ['24.04', '22.04']
+        include:
+          - arch: ppc64le
+            runner-label: ubuntu-24.04-ppc64le
+          - arch: s390x
+            runner-label: ubuntu-24.04-s390x
+    uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
+    with:
+      arch: ${{ matrix.arch }}
+      tag: ${{ matrix.tag }}
+      platform-version: ${{ matrix['platform-version'] }}
+      runner-label: ${{ matrix['runner-label'] }}
+
+
+  release-assets:
+    needs: [build-and-release-matrix, get-tags]
+    strategy:
+      matrix:
+        tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
+    uses: ./.github/workflows/reusable-release-python-tar.yml
+    with:
+      tag: ${{ matrix.tag }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

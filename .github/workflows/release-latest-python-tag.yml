@@ -1,0 +1,72 @@
+name: Release Latest Python Tag
+# This workflow intentionally does not define workflow_dispatch inputs to comply with
+# "build output cannot be affected by user parameters" policy. To override the
+# detected latest stable Python tag, place a single-line file at
+# .github/release/python-tag-override.txt containing the desired version (e.g., 3.13.4).
+
+on:
+  # Must not accept user inputs to comply with policy
+  workflow_dispatch: {}
+
+permissions:
+  contents: read     # Required for checkout and reading repository content
+  actions: write     # Required for calling reusable workflows
+
+jobs:
+  get-latest-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      latest_tag: ${{ steps.get_tag.outputs.latest_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install poetry
+          poetry install --no-interaction --no-ansi
+      - name: Determine tag to use
+        id: get_tag
+        run: |
+          # Optional file-based override to keep functionality without inputs
+          override_file=".github/release/python-tag-override.txt"
+          if [ -f "$override_file" ]; then
+            override_tag=$(sed -n '1p' "$override_file" | tr -d '\r')
+            if [ -n "$override_tag" ]; then
+              echo "Found override tag in $override_file: $override_tag"
+              echo "latest_tag=$override_tag" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+  
+
+          latest_tag=$(poetry run python .github/scripts/get_python_version.py --latest --stable)
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+
+  build-and-release-matrix:
+    needs: get-latest-tag
+    strategy:
+      matrix:
+        platform-version: ['24.04', '22.04']
+        include:
+          - arch: ppc64le
+            runner-label: ubuntu-24.04-ppc64le
+          - arch: s390x
+            runner-label: ubuntu-24.04-s390x
+    uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
+    with:
+      arch: ${{ matrix.arch }}
+      tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
+      platform-version: ${{ matrix.platform-version }}
+      runner-label: ${{ matrix.runner-label }}
+
+  release-asset:
+    needs: [build-and-release-matrix, get-latest-tag]
+    uses: ./.github/workflows/reusable-release-python-tar.yml
+    with:
+      tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
+

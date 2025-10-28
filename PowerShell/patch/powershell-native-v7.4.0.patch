@@ -1,0 +1,79 @@
+diff --git a/libpsl-native/ppc64le.toolchain.cmake b/libpsl-native/ppc64le.toolchain.cmake
+new file mode 100644
+index 0000000..2b10689
+--- /dev/null
++++ b/libpsl-native/ppc64le.toolchain.cmake
+@@ -0,0 +1,17 @@
++set(CMAKE_SYSTEM_NAME Linux)
++set(CMAKE_SYSTEM_VERSION 1)
++set(CMAKE_SYSTEM_PROCESSOR ppc64le) # Replace s390x with ppc64le
++set(CMAKE_CXX_COMPILER g++ -fstack-protector-strong -fpie -D_FORTIFY_SOURCE=2)
++set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,relro,-z,now")
++set(CMAKE_C_COMPILER gcc)
++
++add_compile_options(-g)
++
++set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++
++set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
++set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+diff --git a/libpsl-native/s390x.toolchain.cmake b/libpsl-native/s390x.toolchain.cmake
+new file mode 100644
+index 0000000..b5b2d37
+--- /dev/null
++++ b/libpsl-native/s390x.toolchain.cmake
+@@ -0,0 +1,17 @@
++set(CMAKE_SYSTEM_NAME Linux)
++set(CMAKE_SYSTEM_VERSION 1)
++set(CMAKE_SYSTEM_PROCESSOR s390x)
++set(CMAKE_CXX_COMPILER g++ -fstack-protector-strong -fpie -D_FORTIFY_SOURCE=2)
++set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,relro,-z,now")
++set(CMAKE_C_COMPILER gcc)
++
++add_compile_options(-g)
++
++set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${CROSS_LINK_FLAGS}" CACHE STRING "" FORCE)
++
++set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
++set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
++set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+diff --git a/src/powershell-native/CMakeLists.txt b/src/powershell-native/CMakeLists.txt
+index 051d880..ced6421 100644
+--- a/src/powershell-native/CMakeLists.txt
++++ b/src/powershell-native/CMakeLists.txt
+@@ -15,12 +15,14 @@ SET(BUILD_ARCH_ARM 0)
+ SET(BUILD_ARCH_ARM64 0)
+ SET(BUILD_ARCH_X86 0) 
+ SET(BUILD_ARCH_AMD64 0)
++SET(BUILD_ARCH_S390X 0)
++SET(BUILD_ARCH_PPC64LE 0)
+ 
+ if (BUILD_TARGET_ARCH)
+     SET(WindowsSDKPlatform ${BUILD_TARGET_ARCH})
+     message(STATUS "Building for " ${BUILD_TARGET_ARCH})
+ else ()
+-    message(FATAL_ERROR "Target architecture value should be specified through BUILD_TARGET_ARCH. Supported values are x64, x86, arm, or arm64")
++    message(FATAL_ERROR "Target architecture value should be specified through BUILD_TARGET_ARCH. Supported values are x64, x86, arm, arm64, or ppc64le")
+ endif (BUILD_TARGET_ARCH)
+ 
+ if (WindowsSDKPlatform STREQUAL "x64" OR WindowsSDKPlatform STREQUAL "X64" OR WindowsSDKPlatform STREQUAL "amd64" OR WindowsSDKPlatform STREQUAL "AMD64")
+@@ -35,6 +37,12 @@ elseif (WindowsSDKPlatform STREQUAL "arm" OR WindowsSDKPlatform STREQUAL "ARM")
+ elseif (WindowsSDKPlatform STREQUAL "arm64" OR WindowsSDKPlatform STREQUAL "ARM64")
+     SET(WindowsSDKPlatform "arm64")
+     SET(BUILD_ARCH_ARM64 1)
++elseif (WindowsSDKPlatform STREQUAL "s390x" OR WindowsSDKPlatform STREQUAL "S390X")
++    SET(WindowsSDKPlatform "s390x")
++    SET(BUILD_ARCH_S390X 1)
++elseif (WindowsSDKPlatform STREQUAL "ppc64le" OR WindowsSDKPlatform STREQUAL "PPC64LE") # Add condition for ppc64le
++    SET(WindowsSDKPlatform "ppc64le")
++    SET(BUILD_ARCH_PPC64LE 1)
+ else()
+     message(FATAL_ERROR "Unsupported WindowsSDKPlatform: " ${WindowsSDKPlatform})
+ endif ()

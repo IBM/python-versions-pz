@@ -1,0 +1,48 @@
+name: Build and Release Python Versions (Reusable)
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      platform-version:
+        required: true
+        type: string
+      runner-label:
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: ${{ inputs.runner-label }}
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+
+      - name: Ensure make is installed
+        run: |
+          if ! command -v make > /dev/null; then
+            sudo apt-get update && sudo apt-get install -y make
+          fi
+
+      - name: Build Python artifact using Makefile
+        run: |
+          make PYTHON_VERSION=${{ inputs.tag }} ARCH=${{ inputs.arch }} UBUNTU_VERSION=${{ inputs.platform-version }}
+
+
+      - name: List output files
+        run: ls -l python-versions/output
+
+      - name: Upload tar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-tar-${{ inputs.tag }}-${{ inputs.arch }}-${{ inputs.platform-version }}
+          path: python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.tar.gz

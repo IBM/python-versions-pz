@@ -1,0 +1,178 @@
+name: Reusable Release Python Tar
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag (e.g., 3.13.3)"
+        required: true
+        type: string
+    secrets:
+      GH_TOKEN:
+        required: true
+
+permissions:
+  contents: write    # Required for creating releases and pushing commits
+  actions: read      # Required for downloading artifacts
+
+jobs:
+  release-assets-and-update-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifact
+          pattern: python-tar-${{ inputs.tag }}-*
+          merge-multiple: true
+
+      - name: List downloaded files (debugging step)
+        run: ls -R ./artifact
+
+      - name: Release all .tar.gz files from python-tar
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: Release ${{ inputs.tag }}
+          files: ./artifact/**/*.tar.gz # Uploads all .tar.gz files found in the artifact path
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GH_TOKEN }} # Use the token passed from the calling workflow
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }} # Token needed for push operations
+
+      - name: Pull latest changes
+        # Ensure we have the latest state of the repo, especially the versions-manifests folder
+        run: git pull
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --no-interaction --no-ansi
+        working-directory: .
+
+      - name: Create, commit, and push arch-specific manifest for released asset
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          assets_json='${{ steps.create_release.outputs.assets }}'
+          asset_count=$(echo "$assets_json" | jq length)
+
+          # Use a Bash associative array to group assets by their architecture
+          declare -A ARCH_ASSETS_MAP
+
+          # First pass: Group asset indices by unique architecture from the downloaded files
+          # This handles cases where a single 'tag' might have been built for multiple platform-versions
+          # (e.g., 3.13.3-linux-22.04-ppc64le.tar.gz and 3.13.3-linux-24.04-ppc64le.tar.gz)
+          # within the same 'arch'.
+          for i in $(seq 0 $((asset_count - 1))); do
+            asset_name=$(echo "$assets_json" | jq -r ".[$i].name")
+            base_name="${asset_name#python-}"
+            base_name="${base_name%.tar.gz}"
+            IFS='-' read -r _ _ _ current_arch <<< "$base_name" # Only read the arch part
+
+            ARCH_ASSETS_MAP["$current_arch"]+=" $i" # Store asset index for this arch
+          done
+
+          # Ensure the dedicated manifests directory exists
+          mkdir -p versions-manifests
+
+          # Second pass: Process each unique architecture found and build its manifest file
+          # We iterate over the architectures identified from the downloaded artifacts
+          for arch_key in "${!ARCH_ASSETS_MAP[@]}"; do
+            MANIFEST_FILE="versions-manifests/${{ inputs.tag }}-${arch_key}.json"
+            
+            echo "::group::Processing manifest for tag ${{ inputs.tag }}, arch ${arch_key}"
+
+            # Initialize the manifest file for this specific tag-arch combination.
+            # This will create a new empty file. If it already exists from a previous run, it will be overwritten.
+            echo "[]" > "$MANIFEST_FILE" 
+
+            # Iterate over asset indices that belong to this specific architecture
+            for asset_idx in ${ARCH_ASSETS_MAP["$arch_key"]}; do
+              asset_name=$(echo "$assets_json" | jq -r ".[$asset_idx].name")
+              download_url=$(echo "$assets_json" | jq -r ".[$asset_idx].browser_download_url")
+
+              # Parse asset name again to get all components for the manifest entry
+              base_name="${asset_name#python-}"
+              base_name="${base_name%.tar.gz}"
+              IFS='-' read -r _ platform platform_version actual_arch <<< "$base_name"
+
+              echo "  - Asset: $asset_name"
+              echo "    Platform: $platform"
+              echo "    Platform version: $platform_version"
+              echo "    Download URL: $download_url"
+
+              # Use your Python script to update the specific manifest file
+              poetry run python .github/scripts/manifest_tools.py update_version \
+                "$MANIFEST_FILE" \
+                --version "${{ inputs.tag }}" \
+                --filename "$asset_name" \
+                --arch "$actual_arch" \
+                --platform "$platform" \
+                --platform-version "$platform_version" \
+                --download-url "$download_url" \
+                --stable
+            done
+            echo "::endgroup::"
+          done
+
+          # Final step: Commit and push ALL modified arch-specific manifest files in one atomic Git operation.
+          # This is done once after all unique arch manifests for this run have been prepared.
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Add all JSON files within the versions-manifests directory that were modified
+          git add versions-manifests/*.json 
+          
+          # Only commit if there are actual changes
+          git diff --staged --quiet || git commit -m "Update arch manifests for tag ${{ inputs.tag }} [skip ci]"
+          
+          # Rebase before pushing to gracefully handle any concurrent pushes from other workflow runs
+          # that might have pushed different arch-specific manifests in parallel.
+          git pull --rebase
+          # Exponential back-off with jitter for push
+          max_retries=20 # Increased retries for higher concurrency 
+          base_delay=1   # Starting delay in seconds
+          max_delay=90   # Maximum delay in seconds
+          count=0
+
+          until git push; do
+            count=$((count + 1))
+            if [ $count -ge $max_retries ]; then
+              echo "Push failed after $max_retries attempts. Exiting with failure."
+              exit 1
+            fi
+
+            current_delay=$(( base_delay * (2**(count-1)) ))
+            # Cap the delay at max_delay
+            if [ "$current_delay" -gt "$max_delay" ]; then
+                current_delay="$max_delay"
+            fi
+
+            # Add jitter: +/- 25% of the current_delay (but at least 1s)
+            jitter_range=$(( current_delay / 4 ))
+            random_jitter=$(( RANDOM % (2 * jitter_range + 1) - jitter_range ))
+            sleep_duration=$(( current_delay + random_jitter ))
+
+            # Ensure sleep_duration is at least 1 second to avoid hammering the server
+            if [ "$sleep_duration" -lt 1 ]; then
+                sleep_duration=1
+            fi
+            
+            echo "Push attempt failed. Attempting to fetch, rebase, and retry ($count/$max_retries). Waiting ${sleep_duration}s..."
+            # Always rebase against the target branch to incorporate others' distinct commits
+            git fetch origin
+            git pull --rebase origin ${{ github.ref_name }} 
+            sleep "$sleep_duration"
+          done

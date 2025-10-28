@@ -1,0 +1,554 @@
+diff --git a/.editorconfig b/.editorconfig
+index efe9133c8..4562a836c 100644
+--- a/.editorconfig
++++ b/.editorconfig
+@@ -117,6 +117,8 @@ csharp_prefer_simple_default_expression = true:suggestion
+ 
+ dotnet_code_quality_unused_parameters = non_public:suggestion
+ 
++dotnet_analyzer_diagnostic.severity = suggestion
++
+ # CSharp code style settings:
+ [*.cs]
+ 
+diff --git a/PowerShell.Common.props b/PowerShell.Common.props
+index 28bc08cc5..d2766f3af 100644
+--- a/PowerShell.Common.props
++++ b/PowerShell.Common.props
+@@ -147,7 +147,7 @@
+     <TargetFramework>net9.0</TargetFramework>
+     <LangVersion>11.0</LangVersion>
+ 
+-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+@@ -171,16 +171,16 @@
+     <DefineConstants>$(DefineConstants);UNIX</DefineConstants>
+   </PropertyGroup>
+ 
+-  <!-- Define all OS, debug configuration properties -->
+-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
++  <!-- Define all OS, release configuration properties -->
++  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
++    <PublishReadyToRun>false</PublishReadyToRun>
++    <PublishReadyToRunEmitSymbols>false</PublishReadyToRunEmitSymbols>
++    <Optimize>false</Optimize>
+     <DebugType>portable</DebugType>
+   </PropertyGroup>
+ 
+-  <!-- Define all OS, release configuration properties -->
+-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+-    <PublishReadyToRun>true</PublishReadyToRun>
+-    <PublishReadyToRunEmitSymbols>true</PublishReadyToRunEmitSymbols>
+-    <Optimize>true</Optimize>
++  <!-- Define all OS, debug configuration properties -->
++  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+     <DebugType>portable</DebugType>
+   </PropertyGroup>
+ 
+diff --git a/PowerShell.sln b/PowerShell.sln
+index 224d27ab3..b62832709 100644
+--- a/PowerShell.sln
++++ b/PowerShell.sln
+@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
+ # https://github.com/dotnet/project-system/blob/master/docs/opening-with-new-project-system.md#project-type-guids
+ VisualStudioVersion = 15.0.26730.12
+ MinimumVisualStudioVersion = 10.0.40219.1
+-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "powershell-win-core", "src\powershell-win-core\powershell-win-core.csproj", "{8359D422-E0C4-4A0D-94EB-3C9DD16B7932}"
++# Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "powershell-win-core", "src\powershell-win-core\powershell-win-core.csproj", "{8359D422-E0C4-4A0D-94EB-3C9DD16B7932}"
+ EndProject
+ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Management.Automation", "src\System.Management.Automation\System.Management.Automation.csproj", "{AF660EE7-0183-4B79-A93F-221B6AC1C24B}"
+ EndProject
+@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.WSMan.Runtime", "
+ EndProject
+ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "powershell-unix", "src\powershell-unix\powershell-unix.csproj", "{73EA0BE6-C0C5-4B56-A5AA-DADA4C01D690}"
+ EndProject
+-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xUnit.tests", "test\xUnit\xUnit.tests.csproj", "{08704934-9764-48CE-86DB-BCF0A1CF7899}"
++# Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xUnit.tests", "test\xUnit\xUnit.tests.csproj", "{08704934-9764-48CE-86DB-BCF0A1CF7899}"
+ EndProject
+ # Configuration mapping comment
+ # All global configurations must be mapped to project configurations
+diff --git a/docs/host-powershell/sample/MyApp/MyApp.csproj b/docs/host-powershell/sample/MyApp/MyApp.csproj
+index ab507b5ac..8701f51ca 100644
+--- a/docs/host-powershell/sample/MyApp/MyApp.csproj
++++ b/docs/host-powershell/sample/MyApp/MyApp.csproj
+@@ -3,8 +3,8 @@
+   <PropertyGroup>
+     <TargetFramework>netcoreapp2.1</TargetFramework>
+     <AssemblyName>MyApp</AssemblyName>
+-    <OutputType>Exe</OutputType>
+-    <RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
++    <OutputType>Library</OutputType>
++    <RuntimeIdentifiers>linux-s390x</RuntimeIdentifiers>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/GlobalTools/PowerShell.Windows.x64/PowerShell.Windows.x64.csproj b/src/GlobalTools/PowerShell.Windows.x64/PowerShell.Windows.x64.csproj
+index f18bdae61..2a29f5e71 100644
+--- a/src/GlobalTools/PowerShell.Windows.x64/PowerShell.Windows.x64.csproj
++++ b/src/GlobalTools/PowerShell.Windows.x64/PowerShell.Windows.x64.csproj
+@@ -11,6 +11,7 @@
+     <Version>$(PackageVersion)</Version>
+     <DelaySign>true</DelaySign>
+     <AssemblyOriginatorKeyFile>../../signing/visualstudiopublic.snk</AssemblyOriginatorKeyFile>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.Management.Infrastructure.CimCmdlets/Microsoft.Management.Infrastructure.CimCmdlets.csproj b/src/Microsoft.Management.Infrastructure.CimCmdlets/Microsoft.Management.Infrastructure.CimCmdlets.csproj
+index 582858a59..bf82cf46f 100644
+--- a/src/Microsoft.Management.Infrastructure.CimCmdlets/Microsoft.Management.Infrastructure.CimCmdlets.csproj
++++ b/src/Microsoft.Management.Infrastructure.CimCmdlets/Microsoft.Management.Infrastructure.CimCmdlets.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.Management.Infrastructure.CimCmdlets project</Description>
+     <NoWarn>$(NoWarn);CS1570;CS1572;CS1573;CS1574;CS1584;CS1587;CS1591</NoWarn>
+     <AssemblyName>Microsoft.Management.Infrastructure.CimCmdlets</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.Commands.Diagnostics/Microsoft.PowerShell.Commands.Diagnostics.csproj b/src/Microsoft.PowerShell.Commands.Diagnostics/Microsoft.PowerShell.Commands.Diagnostics.csproj
+index d17d99b19..0d58be23a 100644
+--- a/src/Microsoft.PowerShell.Commands.Diagnostics/Microsoft.PowerShell.Commands.Diagnostics.csproj
++++ b/src/Microsoft.PowerShell.Commands.Diagnostics/Microsoft.PowerShell.Commands.Diagnostics.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.PowerShell.Commands.Diagnostics project</Description>
+     <NoWarn>$(NoWarn);CS1591;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.Commands.Diagnostics</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.Commands.Management/Microsoft.PowerShell.Commands.Management.csproj b/src/Microsoft.PowerShell.Commands.Management/Microsoft.PowerShell.Commands.Management.csproj
+index a4cb9ad9d..882ece3ea 100644
+--- a/src/Microsoft.PowerShell.Commands.Management/Microsoft.PowerShell.Commands.Management.csproj
++++ b/src/Microsoft.PowerShell.Commands.Management/Microsoft.PowerShell.Commands.Management.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.PowerShell.Commands.Management project</Description>
+     <NoWarn>$(NoWarn);CS1570;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.Commands.Management</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.Commands.Utility/Microsoft.PowerShell.Commands.Utility.csproj b/src/Microsoft.PowerShell.Commands.Utility/Microsoft.PowerShell.Commands.Utility.csproj
+index bc15337da..5675f8189 100644
+--- a/src/Microsoft.PowerShell.Commands.Utility/Microsoft.PowerShell.Commands.Utility.csproj
++++ b/src/Microsoft.PowerShell.Commands.Utility/Microsoft.PowerShell.Commands.Utility.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.PowerShell.Commands.Utility project</Description>
+     <NoWarn>$(NoWarn);CS1570;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.Commands.Utility</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.ConsoleHost/Microsoft.PowerShell.ConsoleHost.csproj b/src/Microsoft.PowerShell.ConsoleHost/Microsoft.PowerShell.ConsoleHost.csproj
+index bbc8023b1..e0ff0784e 100644
+--- a/src/Microsoft.PowerShell.ConsoleHost/Microsoft.PowerShell.ConsoleHost.csproj
++++ b/src/Microsoft.PowerShell.ConsoleHost/Microsoft.PowerShell.ConsoleHost.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell Host</Description>
+     <NoWarn>$(NoWarn);CS1570;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.ConsoleHost</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.CoreCLR.Eventing/Microsoft.PowerShell.CoreCLR.Eventing.csproj b/src/Microsoft.PowerShell.CoreCLR.Eventing/Microsoft.PowerShell.CoreCLR.Eventing.csproj
+index bd8754bff..a6fc62530 100644
+--- a/src/Microsoft.PowerShell.CoreCLR.Eventing/Microsoft.PowerShell.CoreCLR.Eventing.csproj
++++ b/src/Microsoft.PowerShell.CoreCLR.Eventing/Microsoft.PowerShell.CoreCLR.Eventing.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.PowerShell.CoreCLR.Eventing project</Description>
+     <NoWarn>$(NoWarn);CS1591;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.CoreCLR.Eventing</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.GlobalTool.Shim/Microsoft.PowerShell.GlobalTool.Shim.csproj b/src/Microsoft.PowerShell.GlobalTool.Shim/Microsoft.PowerShell.GlobalTool.Shim.csproj
+index d0203344c..22ccd1a4e 100644
+--- a/src/Microsoft.PowerShell.GlobalTool.Shim/Microsoft.PowerShell.GlobalTool.Shim.csproj
++++ b/src/Microsoft.PowerShell.GlobalTool.Shim/Microsoft.PowerShell.GlobalTool.Shim.csproj
+@@ -4,9 +4,10 @@
+   <PropertyGroup>
+     <Description>Shim for global tool to select appropriate runtime</Description>
+     <AssemblyName>Microsoft.PowerShell.GlobalTool.Shim</AssemblyName>
+-    <OutputType>EXE</OutputType>
++    <OutputType>Library</OutputType>
+     <RootNamespace>Microsoft.PowerShell.GlobalTool.Shim</RootNamespace>
+     <UseAppHost>False</UseAppHost>
++    <SelfContained>False</SelfContained>
+   </PropertyGroup>
+ 
+   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(SDKToUse)' == 'Microsoft.NET.Sdk' " />
+diff --git a/src/Microsoft.PowerShell.LocalAccounts/Microsoft.PowerShell.LocalAccounts.csproj b/src/Microsoft.PowerShell.LocalAccounts/Microsoft.PowerShell.LocalAccounts.csproj
+index a85b06d4f..1c580e6b5 100644
+--- a/src/Microsoft.PowerShell.LocalAccounts/Microsoft.PowerShell.LocalAccounts.csproj
++++ b/src/Microsoft.PowerShell.LocalAccounts/Microsoft.PowerShell.LocalAccounts.csproj
+@@ -5,6 +5,7 @@
+   <PropertyGroup>
+     <Description>PowerShell's Microsoft.PowerShell.LocalAccounts project</Description>
+     <AssemblyName>Microsoft.PowerShell.LocalAccounts</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.SDK/Microsoft.PowerShell.SDK.csproj b/src/Microsoft.PowerShell.SDK/Microsoft.PowerShell.SDK.csproj
+index 75492f49c..4b9603493 100644
+--- a/src/Microsoft.PowerShell.SDK/Microsoft.PowerShell.SDK.csproj
++++ b/src/Microsoft.PowerShell.SDK/Microsoft.PowerShell.SDK.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell SDK metapackage</Description>
+     <PackageId>Microsoft.PowerShell.SDK</PackageId>
+     <IncludeBuildOutput>false</IncludeBuildOutput>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.PowerShell.Security/Microsoft.PowerShell.Security.csproj b/src/Microsoft.PowerShell.Security/Microsoft.PowerShell.Security.csproj
+index a6dadabfe..eb03963d6 100644
+--- a/src/Microsoft.PowerShell.Security/Microsoft.PowerShell.Security.csproj
++++ b/src/Microsoft.PowerShell.Security/Microsoft.PowerShell.Security.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.PowerShell.Security project</Description>
+     <NoWarn>$(NoWarn);CS1570;CA1416</NoWarn>
+     <AssemblyName>Microsoft.PowerShell.Security</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.WSMan.Management/Microsoft.WSMan.Management.csproj b/src/Microsoft.WSMan.Management/Microsoft.WSMan.Management.csproj
+index c9d448a50..4daf11269 100644
+--- a/src/Microsoft.WSMan.Management/Microsoft.WSMan.Management.csproj
++++ b/src/Microsoft.WSMan.Management/Microsoft.WSMan.Management.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's Microsoft.WSMan.Management project</Description>
+     <NoWarn>$(NoWarn);CA1416</NoWarn>
+     <AssemblyName>Microsoft.WSMan.Management</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/Microsoft.WSMan.Runtime/Microsoft.WSMan.Runtime.csproj b/src/Microsoft.WSMan.Runtime/Microsoft.WSMan.Runtime.csproj
+index 2a9439c02..6c6201db9 100644
+--- a/src/Microsoft.WSMan.Runtime/Microsoft.WSMan.Runtime.csproj
++++ b/src/Microsoft.WSMan.Runtime/Microsoft.WSMan.Runtime.csproj
+@@ -3,6 +3,7 @@
+   <PropertyGroup>
+     <Description>PowerShell's Microsoft.WSMan.Runtime project</Description>
+     <AssemblyName>Microsoft.WSMan.Runtime</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+ </Project>
+diff --git a/src/Modules/PSGalleryModules.csproj b/src/Modules/PSGalleryModules.csproj
+index 5f9f89a45..98cd9be31 100644
+--- a/src/Modules/PSGalleryModules.csproj
++++ b/src/Modules/PSGalleryModules.csproj
+@@ -8,6 +8,7 @@
+     <TargetFramework>net9.0</TargetFramework>
+ 
+     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/src/ResGen/ResGen.csproj b/src/ResGen/ResGen.csproj
+index a6448b1dc..c7dc2beec 100644
+--- a/src/ResGen/ResGen.csproj
++++ b/src/ResGen/ResGen.csproj
+@@ -4,10 +4,11 @@
+     <Description>Generates C# typed bindings for .resx files</Description>
+     <TargetFramework>net9.0</TargetFramework>
+     <AssemblyName>resgen</AssemblyName>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
+     <TieredCompilation>true</TieredCompilation>
+     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+-    <RuntimeIdentifiers>win-x86;win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+ </Project>
+diff --git a/src/System.Management.Automation/SourceGenerators/PSVersionInfoGenerator/PSVersionInfoGenerator.csproj b/src/System.Management.Automation/SourceGenerators/PSVersionInfoGenerator/PSVersionInfoGenerator.csproj
+index 9de256a3b..87a9e4e21 100644
+--- a/src/System.Management.Automation/SourceGenerators/PSVersionInfoGenerator/PSVersionInfoGenerator.csproj
++++ b/src/System.Management.Automation/SourceGenerators/PSVersionInfoGenerator/PSVersionInfoGenerator.csproj
+@@ -2,6 +2,7 @@
+   <PropertyGroup>
+     <Description>Generate code for SMA using source generator</Description>
+     <AssemblyName>SMA.Generator</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <PropertyGroup>
+diff --git a/src/System.Management.Automation/System.Management.Automation.csproj b/src/System.Management.Automation/System.Management.Automation.csproj
+index d0e81fddb..796942610 100644
+--- a/src/System.Management.Automation/System.Management.Automation.csproj
++++ b/src/System.Management.Automation/System.Management.Automation.csproj
+@@ -4,6 +4,7 @@
+     <Description>PowerShell's System.Management.Automation project</Description>
+     <NoWarn>$(NoWarn);CS1570;CS1734;CA1416;CA2022</NoWarn>
+     <AssemblyName>System.Management.Automation</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <PropertyGroup>
+diff --git a/src/TypeCatalogGen/TypeCatalogGen.csproj b/src/TypeCatalogGen/TypeCatalogGen.csproj
+index 56db23254..82fe7503c 100644
+--- a/src/TypeCatalogGen/TypeCatalogGen.csproj
++++ b/src/TypeCatalogGen/TypeCatalogGen.csproj
+@@ -3,12 +3,13 @@
+   <PropertyGroup>
+     <Description>Generates CorePsTypeCatalog.cs given powershell.inc</Description>
+     <TargetFramework>net9.0</TargetFramework>
+-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+     <AssemblyName>TypeCatalogGen</AssemblyName>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
+     <TieredCompilation>true</TieredCompilation>
+     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+-    <RuntimeIdentifiers>win-x86;win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+ </Project>
+diff --git a/src/powershell-unix/powershell-unix.csproj b/src/powershell-unix/powershell-unix.csproj
+index 802acf05e..c642f1cc7 100644
+--- a/src/powershell-unix/powershell-unix.csproj
++++ b/src/powershell-unix/powershell-unix.csproj
+@@ -5,11 +5,8 @@
+   <PropertyGroup>
+     <Description>PowerShell top-level project with .NET CLI host</Description>
+     <AssemblyName>pwsh</AssemblyName>
+-    <OutputType>Exe</OutputType>
+-    <TieredCompilation>true</TieredCompilation>
+-    <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+-    <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
+-    <RuntimeIdentifiers>linux-x64;osx-x64;</RuntimeIdentifiers>
++    <OutputType>Library</OutputType>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/Test.Common.props b/test/Test.Common.props
+index 769b1b5b2..462e59638 100644
+--- a/test/Test.Common.props
++++ b/test/Test.Common.props
+@@ -9,11 +9,12 @@
+     <TargetFramework>net9.0</TargetFramework>
+     <LangVersion>11.0</LangVersion>
+ 
+-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
++    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+     <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+     <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+     <DisableImplicitNamespaceImports_DotNet>true</DisableImplicitNamespaceImports_DotNet>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <PropertyGroup>
+diff --git a/test/hosting/hosting.tests.csproj b/test/hosting/hosting.tests.csproj
+index cb72e0a90..10276deca 100644
+--- a/test/hosting/hosting.tests.csproj
++++ b/test/hosting/hosting.tests.csproj
+@@ -5,6 +5,7 @@
+   <PropertyGroup>
+     <Description>PowerShell hosting SDK xUnit Tests</Description>
+     <AssemblyName>powershell-hosting-tests</AssemblyName>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <PropertyGroup>
+diff --git a/test/perf/benchmarks/powershell-perf.csproj b/test/perf/benchmarks/powershell-perf.csproj
+index 93c164b98..97980f75f 100644
+--- a/test/perf/benchmarks/powershell-perf.csproj
++++ b/test/perf/benchmarks/powershell-perf.csproj
+@@ -7,7 +7,8 @@
+   <PropertyGroup>
+     <Description>PowerShell Performance Tests</Description>
+     <AssemblyName>powershell-perf</AssemblyName>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
++    <SelfContained>false</SelfContained>
+ 
+     <NoWarn>$(NoWarn);CS8002</NoWarn>
+     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+diff --git a/test/perf/dotnet-tools/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj b/test/perf/dotnet-tools/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj
+index 427245af6..73ed00784 100644
+--- a/test/perf/dotnet-tools/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj
++++ b/test/perf/dotnet-tools/BenchmarkDotNet.Extensions/BenchmarkDotNet.Extensions.csproj
+@@ -3,6 +3,7 @@
+   <PropertyGroup>
+     <OutputType>Library</OutputType>
+     <TargetFramework>netstandard2.0</TargetFramework>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/perf/dotnet-tools/Reporting/Reporting.csproj b/test/perf/dotnet-tools/Reporting/Reporting.csproj
+index 693cc1b64..35b67a1ed 100644
+--- a/test/perf/dotnet-tools/Reporting/Reporting.csproj
++++ b/test/perf/dotnet-tools/Reporting/Reporting.csproj
+@@ -3,6 +3,7 @@
+   <PropertyGroup>
+     <OutputType>Library</OutputType>
+     <TargetFramework>netstandard2.0</TargetFramework>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/perf/dotnet-tools/ResultsComparer/ResultsComparer.csproj b/test/perf/dotnet-tools/ResultsComparer/ResultsComparer.csproj
+index f4874cfa6..96955d168 100644
+--- a/test/perf/dotnet-tools/ResultsComparer/ResultsComparer.csproj
++++ b/test/perf/dotnet-tools/ResultsComparer/ResultsComparer.csproj
+@@ -1,9 +1,10 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
+     <TargetFrameworks>$(PERFLAB_TARGET_FRAMEWORKS)</TargetFrameworks>
+     <TargetFramework Condition="'$(TargetFrameworks)' == ''">net5.0</TargetFramework>
+     <LangVersion>11.0</LangVersion>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+   <ItemGroup>
+     <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.14.0" />
+diff --git a/test/tools/Modules/PSGalleryTestModules.csproj b/test/tools/Modules/PSGalleryTestModules.csproj
+index 097453b50..16656ac3b 100644
+--- a/test/tools/Modules/PSGalleryTestModules.csproj
++++ b/test/tools/Modules/PSGalleryTestModules.csproj
+@@ -4,6 +4,7 @@
+ 
+   <ItemGroup>
+     <PackageReference Include="SelfSignedCertificate" Version="0.0.4" />
++    <SelfContained>false</SelfContained>
+   </ItemGroup>
+ 
+ </Project>
+diff --git a/test/tools/NamedPipeConnection/src/code/Microsoft.PowerShell.NamedPipeConnection.csproj b/test/tools/NamedPipeConnection/src/code/Microsoft.PowerShell.NamedPipeConnection.csproj
+index 8bf1139db..72385633e 100644
+--- a/test/tools/NamedPipeConnection/src/code/Microsoft.PowerShell.NamedPipeConnection.csproj
++++ b/test/tools/NamedPipeConnection/src/code/Microsoft.PowerShell.NamedPipeConnection.csproj
+@@ -11,6 +11,7 @@
+     <TargetFrameworks>net9.0</TargetFrameworks>
+     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+     <LangVersion>11.0</LangVersion>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/tools/TestAlc/init/Test.Isolated.Init.csproj b/test/tools/TestAlc/init/Test.Isolated.Init.csproj
+index c8d37ac95..46d931a7e 100644
+--- a/test/tools/TestAlc/init/Test.Isolated.Init.csproj
++++ b/test/tools/TestAlc/init/Test.Isolated.Init.csproj
+@@ -12,6 +12,7 @@
+ 
+     <!-- Deploy the produced assembly -->
+     <PublishDir>..\..\Modules\IsolatedModule</PublishDir>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/tools/TestAlc/nested/Test.Isolated.Nested.csproj b/test/tools/TestAlc/nested/Test.Isolated.Nested.csproj
+index 200b284b3..707235afc 100644
+--- a/test/tools/TestAlc/nested/Test.Isolated.Nested.csproj
++++ b/test/tools/TestAlc/nested/Test.Isolated.Nested.csproj
+@@ -13,6 +13,7 @@
+ 
+     <!-- Deploy the produced assembly -->
+     <PublishDir>..\..\Modules\IsolatedModule\Dependencies</PublishDir>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/tools/TestAlc/root/Test.Isolated.Root.csproj b/test/tools/TestAlc/root/Test.Isolated.Root.csproj
+index 2a7570641..a9f0067da 100644
+--- a/test/tools/TestAlc/root/Test.Isolated.Root.csproj
++++ b/test/tools/TestAlc/root/Test.Isolated.Root.csproj
+@@ -12,6 +12,7 @@
+ 
+     <!-- Deploy the produced assembly -->
+     <PublishDir>..\..\Modules\IsolatedModule\Dependencies</PublishDir>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/tools/TestExe/TestExe.csproj b/test/tools/TestExe/TestExe.csproj
+index 2e9ad01d1..265f1d809 100644
+--- a/test/tools/TestExe/TestExe.csproj
++++ b/test/tools/TestExe/TestExe.csproj
+@@ -5,10 +5,11 @@
+   <PropertyGroup>
+     <Description>Very simple little console class that you can use to for testing PowerShell interaction with native commands</Description>
+     <AssemblyName>testexe</AssemblyName>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
+     <TieredCompilation>true</TieredCompilation>
+     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+-    <RuntimeIdentifiers>win-x86;win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+ </Project>
+diff --git a/test/tools/UnixSocket/UnixSocket.csproj b/test/tools/UnixSocket/UnixSocket.csproj
+index e8a177bd2..61fb965fe 100644
+--- a/test/tools/UnixSocket/UnixSocket.csproj
++++ b/test/tools/UnixSocket/UnixSocket.csproj
+@@ -5,10 +5,10 @@
+   <PropertyGroup>
+     <Description>A very simple ASP.NET Core app to provide an UnixSocket server for testing.</Description>
+     <AssemblyName>UnixSocket</AssemblyName>
+-    <OutputType>Exe</OutputType>
++    <OutputType>Library</OutputType>
+     <TieredCompilation>true</TieredCompilation>
+     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+-    <RuntimeIdentifiers>win-x86;win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
+   </PropertyGroup>
+ 
+ </Project>
+diff --git a/test/tools/WebListener/WebListener.csproj b/test/tools/WebListener/WebListener.csproj
+index 7117e2355..1188d6232 100644
+--- a/test/tools/WebListener/WebListener.csproj
++++ b/test/tools/WebListener/WebListener.csproj
+@@ -4,6 +4,7 @@
+ 
+   <PropertyGroup>
+     <Description>A simple ASP.NET Core MVC app to provide an HTTP and HTTPS server for testing.</Description>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>
+diff --git a/test/xUnit/xUnit.tests.csproj b/test/xUnit/xUnit.tests.csproj
+index 114c1f811..f8ee94997 100644
+--- a/test/xUnit/xUnit.tests.csproj
++++ b/test/xUnit/xUnit.tests.csproj
+@@ -5,14 +5,16 @@
+   <PropertyGroup>
+     <Description>PowerShell xUnit Tests</Description>
+     <AssemblyName>powershell-tests</AssemblyName>
+-    <GenerateProgramFile>true</GenerateProgramFile>
+-    <RuntimeIdentifiers>win-x86;win-x64;osx-x64;linux-x64</RuntimeIdentifiers>
++    <GenerateProgramFile>falsee</GenerateProgramFile>
++    <RuntimeIdentifiers>almalinux.8-s390x</RuntimeIdentifiers>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <PropertyGroup>
+     <DelaySign>true</DelaySign>
+     <AssemblyOriginatorKeyFile>../../src/signing/visualstudiopublic.snk</AssemblyOriginatorKeyFile>
+     <SignAssembly>true</SignAssembly>
++    <SelfContained>false</SelfContained>
+   </PropertyGroup>
+ 
+   <ItemGroup>

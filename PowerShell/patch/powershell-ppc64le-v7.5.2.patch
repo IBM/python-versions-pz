@@ -1,0 +1,89 @@
+diff --git a/build.psm1 b/build.psm1
+index 34d79670f..d28b0627b 100644
+--- a/build.psm1
++++ b/build.psm1
+@@ -324,6 +324,7 @@ function Start-PSBuild {
+                      "linux-arm",
+                      "linux-arm64",
+                      "linux-x64",
++                    "linux-ppc64le",
+                      "osx-arm64",
+                      "osx-x64",
+                      "win-arm",
+@@ -499,6 +500,15 @@ Fix steps:
+         $Arguments += "/property:PublishReadyToRun=false"
+     }
+ 
++    # As the ReadyToRun package for linux-ppc64le is not available on NuGet,
++    # we must explicitly disable ReadyToRun compilation for this runtime.
++    # This addresses the NETSDK1094 error for this specific platform.
++    if ($Options.Runtime -eq 'linux-ppc64le') {
++        $Arguments += "/property:PublishReadyToRun=false"
++        $Arguments += "/property:WarnAsError=false" # Do not treat warnings as errors for ppc64le
++        $Arguments += "/property:RunAnalyzers=false" # Disable analyzers for ppc64le
++    }
++
+     $Arguments += "--configuration", $Options.Configuration
+     $Arguments += "--framework", $Options.Framework
+ 
+@@ -1001,6 +1011,7 @@ function New-PSOptions {
+                      "linux-arm",
+                      "linux-arm64",
+                      "linux-x64",
++                    "linux-ppc64le",
+                      "osx-arm64",
+                      "osx-x64",
+                      "win-arm",
+@@ -3800,6 +3811,9 @@ function Clear-NativeDependencies
+         '.*-arm64' {
+             $diasymFileName = $diasymFileNamePattern -f 'arm64'
+         }
++        '.*-ppc64le' {
++            $diasymFileName = $diasymFileNamePattern -f 'ppc64le'
++        }
+         'fxdependent.*' {
+             Write-Verbose -Message "$($script:Options.Runtime) is a fxdependent runtime, no cleanup needed in pwsh.deps.json" -Verbose
+             return
+@@ -3880,3 +3894,4 @@ function Set-PipelineVariable {
+     # also set in the current session
+     Set-Item -Path "env:$Name" -Value $Value
+ }
++
+diff --git a/tools/packaging/packaging.psm1 b/tools/packaging/packaging.psm1
+index 52355c1eb..4fd106d69 100644
+--- a/tools/packaging/packaging.psm1
++++ b/tools/packaging/packaging.psm1
+@@ -609,6 +609,15 @@ function Start-PSPackage {
+                 }
+             }
+             'deb' {
++                # Determine the host architecture dynamically
++                $hostArchitecture = switch ($Runtime) {
++                    'linux-arm64' { 'arm64' }
++                    'linux-arm'   { 'armhf' } # Assuming arm32 is armhf for Debian
++                    'linux-ppc64le' { 'ppc64el' } # Debian uses 'ppc64el' for ppc64le
++                    'linux-x64'   { 'amd64' }
++                    default       { throw "Unsupported runtime architecture: $Runtime" }
++                }
++
+                 $Arguments = @{
+                     Type = 'deb'
+                     PackageSourcePath = $Source
+@@ -617,7 +626,7 @@ function Start-PSPackage {
+                     Force = $Force
+                     NoSudo = $NoSudo
+                     LTS = $LTS
+-                    HostArchitecture = "amd64"
++                    HostArchitecture = $hostArchitecture
+                 }
+                 foreach ($Distro in $Script:DebianDistributions) {
+                     $Arguments["Distribution"] = $Distro
+@@ -1035,7 +1044,7 @@ function New-UnixPackage {
+         # Host architecture values allowed for rpm type packages include: x86_64, aarch64, native, all, noarch, any
+         # Host architecture values allowed for osxpkg type packages include: x86_64, arm64
+         [string]
+-        [ValidateSet("x86_64", "amd64", "aarch64", "arm64", "native", "all", "noarch", "any")]
++        [ValidateSet("x86_64", "amd64", "aarch64", "arm64", "ppc64el", "native", "all", "noarch", "any")]
+         $HostArchitecture,
+ 
+         [Switch]

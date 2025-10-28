@@ -1,0 +1,4 @@
+# Optional: set a version filter for release-matching-python-tags workflow
+# Examples:
+# 3.13.*
+# 3.12.*
