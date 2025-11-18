@@ -1,0 +1,68 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases"
+  ],
+  "schedule": ["before 3am on Monday"],
+  "prConcurrentLimit": 2,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "ignorePaths": [
+    "**/versions-manifests/**",
+    "versions-manifest.json",
+    "versions-manifest-ppc64le.json",
+    "**/PowerShell/patch/**/*.tar.gz",
+    "**/PowerShell/patch/**/*.patch"
+  ],
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions updates together",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": false,
+      "schedule": ["before 3am on Monday"]
+    },
+    {
+      "description": "Group all Docker base image updates",
+      "matchDatasources": ["docker"],
+      "groupName": "Docker base images",
+      "automerge": false,
+      "schedule": ["before 3am on Monday"]
+    },
+    {
+      "description": "Python dependencies in pyproject.toml",
+      "matchManagers": ["poetry"],
+      "groupName": "Python dependencies",
+      "automerge": false,
+      "schedule": ["before 3am on Monday"]
+    },
+    {
+      "description": "Require approval for major updates to critical dependencies",
+      "matchUpdateTypes": ["major"],
+      "matchPackagePatterns": ["python", "ubuntu", "dotnet", "powershell"],
+      "dependencyDashboardApproval": true,
+      "automerge": false
+    },
+    {
+      "description": "Auto-approve minor and patch updates for non-critical deps",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackagePatterns": ["^actions/"],
+      "automerge": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "assignees": ["@adilhusain-s"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 3am on the first day of the month"]
+  },
+  "ignoreDeps": [],
+  "assignees": ["adilhusain-s"],
+  "reviewers": ["adilhusain-s"]
+}
