@@ -23,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Python
-        uses: adilhusain-s/setup-python@main
+        uses: IBM/setup-python-pz@main
         with:
           python-version: 3.13.4
           architecture: ${{ matrix.arch }}
