@@ -9,7 +9,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read     # Required for checkout and reading repository content
+  contents: write    # Required for release workflow to push manifest and assets
   actions: write     # Required for calling reusable workflows
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.13'
 
       - name: Install Python dependencies
         run: |
@@ -38,7 +38,7 @@ jobs:
           # Optional file-based filter override to keep functionality without inputs
           filter_file=".github/release/python-tag-filter.txt"
           if [ -f "$filter_file" ]; then
-            FILTER=$(sed -n '1p' "$filter_file" | tr -d '\r')
+            FILTER=$( (grep -vE '^\s*(#|$)' "$filter_file" | head -n1 | tr -d '\r') || true )
             if [ -n "$FILTER" ]; then
               echo "Using filter from $filter_file: $FILTER"
             else
@@ -70,11 +70,12 @@ jobs:
       matrix:
         tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
         platform-version: ['24.04', '22.04']
+        arch: ['s390x', 'ppc64le']
         include:
-          - arch: ppc64le
-            runner-label: ubuntu-24.04-ppc64le
           - arch: s390x
             runner-label: ubuntu-24.04-s390x
+          - arch: ppc64le
+            runner-label: ubuntu-24.04-ppc64le
     uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
     with:
       arch: ${{ matrix.arch }}
@@ -85,6 +86,9 @@ jobs:
 
   release-assets:
     needs: [build-and-release-matrix, get-tags]
+    permissions:
+      contents: write
+      actions: read
     strategy:
       matrix:
         tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
