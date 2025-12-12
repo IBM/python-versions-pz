@@ -33,16 +33,33 @@ jobs:
             sudo apt-get update && sudo apt-get install -y make
           fi
 
+      - name: Ensure Docker CLI is available
+        run: |
+          if ! command -v docker > /dev/null; then
+            sudo apt-get update && sudo apt-get install -y docker.io
+          fi
+          if command -v systemctl > /dev/null; then
+            sudo systemctl start docker || true
+          elif command -v service > /dev/null; then
+            sudo service docker start || true
+          fi
+
       - name: Build Python artifact using Makefile
         run: |
-          make PYTHON_VERSION=${{ inputs.tag }} ARCH=${{ inputs.arch }} UBUNTU_VERSION=${{ inputs.platform-version }}
+          make CONTAINER_ENGINE="sudo docker" PYTHON_VERSION=${{ inputs.tag }} ARCH=${{ inputs.arch }} UBUNTU_VERSION=${{ inputs.platform-version }}
 
 
       - name: List output files
         run: ls -l python-versions/output
 
-      - name: Upload tar artifact
+      - name: "Upload artifacts: tar & security reports"
         uses: actions/upload-artifact@v4
         with:
           name: python-tar-${{ inputs.tag }}-${{ inputs.arch }}-${{ inputs.platform-version }}
-          path: python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.tar.gz
+          path: |
+            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.tar.gz
+            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}-vuln.json
+            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}-secret.json
+            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.sbom.json
+            python-versions/output/trivy-gate-result.json
+            python-versions/output/trivy-gate.log
