@@ -7,13 +7,21 @@ on:
         description: "Release tag (e.g., 3.13.3)"
         required: true
         type: string
+      files:
+        description: "Glob pattern(s) for release files passed to softprops/action-gh-release (newline separated)"
+        required: false
+        type: string
+        default: |
+          ./artifact/**/*.tar.gz
+          ./artifact/**/*.json
+          ./artifact/**/*.log
     secrets:
       GH_TOKEN:
         required: true
 
 permissions:
-  contents: write    # Required for creating releases and pushing commits
-  actions: read      # Required for downloading artifacts
+  contents: write # Required for creating releases and pushing commits
+  actions: read # Required for downloading artifacts
 
 jobs:
   release-assets-and-update-manifest:
@@ -35,7 +43,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name: Release ${{ inputs.tag }}
-          files: ./artifact/**/*.tar.gz # Uploads all .tar.gz files found in the artifact path
+          files: ${{ inputs.files }} # Accept a files pattern from the calling workflow, default set on workflow_call
           draft: false
           prerelease: false
           token: ${{ secrets.GH_TOKEN }} # Use the token passed from the calling workflow
@@ -52,7 +60,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -77,11 +85,24 @@ jobs:
           # within the same 'arch'.
           for i in $(seq 0 $((asset_count - 1))); do
             asset_name=$(echo "$assets_json" | jq -r ".[$i].name")
-            base_name="${asset_name#python-}"
-            base_name="${base_name%.tar.gz}"
-            IFS='-' read -r _ _ _ current_arch <<< "$base_name" # Only read the arch part
+            # Normalize and strip known prefixes and extensions we expect
+            stripped="$asset_name"
+            # Remove common prefixes 'python-' and 'trivy-python-' (for security artifacts)
+            stripped="${stripped#python-}"
+            stripped="${stripped#trivy-python-}"
+            # Remove several known extensions
+            stripped="${stripped%.tar.gz}"
+            stripped="${stripped%.sbom.json}"
+            stripped="${stripped%.json}"
+            stripped="${stripped%.log}"
 
-            ARCH_ASSETS_MAP["$current_arch"]+=" $i" # Store asset index for this arch
+            # Split the stripped name into parts; expected format: <version>-<platform>-<platform_version>-<arch>[-optional]
+            IFS='-' read -r -a parts <<< "$stripped"
+            # Only group assets that include an architecture token at the expected position
+            if [ ${#parts[@]} -ge 4 ]; then
+              current_arch="${parts[3]}"
+              ARCH_ASSETS_MAP["$current_arch"]+=" $i"
+            fi
           done
 
           # Ensure the dedicated manifests directory exists
@@ -103,10 +124,19 @@ jobs:
               asset_name=$(echo "$assets_json" | jq -r ".[$asset_idx].name")
               download_url=$(echo "$assets_json" | jq -r ".[$asset_idx].browser_download_url")
 
-              # Parse asset name again to get all components for the manifest entry
-              base_name="${asset_name#python-}"
-              base_name="${base_name%.tar.gz}"
-              IFS='-' read -r _ platform platform_version actual_arch <<< "$base_name"
+              # Normalize and strip known prefixes and extensions
+              stripped="$asset_name"
+              stripped="${stripped#python-}"
+              stripped="${stripped#trivy-python-}"
+              stripped="${stripped%.tar.gz}"
+              stripped="${stripped%.sbom.json}"
+              stripped="${stripped%.json}"
+              stripped="${stripped%.log}"
+              IFS='-' read -r -a parts <<< "$stripped"
+              # Determine fields: version, platform, platform_version, arch
+              platform="${parts[1]:-}" || true
+              platform_version="${parts[2]:-}" || true
+              actual_arch="${parts[3]:-}"
 
               echo "  - Asset: $asset_name"
               echo "    Platform: $platform"
@@ -131,13 +161,13 @@ jobs:
           # This is done once after all unique arch manifests for this run have been prepared.
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           # Add all JSON files within the versions-manifests directory that were modified
           git add versions-manifests/*.json 
-          
+
           # Only commit if there are actual changes
           git diff --staged --quiet || git commit -m "Update arch manifests for tag ${{ inputs.tag }} [skip ci]"
-          
+
           # Rebase before pushing to gracefully handle any concurrent pushes from other workflow runs
           # that might have pushed different arch-specific manifests in parallel.
           git pull --rebase
