@@ -69,4 +69,6 @@ jobs:
     uses: ./.github/workflows/reusable-release-python-tar.yml
     with:
       tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

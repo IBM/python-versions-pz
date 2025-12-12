@@ -12,10 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04-ppc64le
+          - os: ubuntu-24.04
             arch: ppc64le
-	  - os: ubuntu-24.04-s390x
-	    arch: s390x
+          - os: ubuntu-24.04
+            arch: s390x
           - os: ubuntu-latest
             arch: x64
     runs-on: ${{ matrix.os }}
