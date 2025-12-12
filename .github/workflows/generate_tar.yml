@@ -8,9 +8,6 @@ permissions:
 
 on:
   workflow_dispatch: {}
-  push:
-    branches:
-      - "**"
 
 jobs:
   generate-tar:
@@ -44,7 +41,7 @@ jobs:
         run: |
           git clone https://github.com/PowerShell/PowerShell.git pwsh-src
           cd pwsh-src
-          git checkout ${{ steps.get_tag.outputs.pwsh_tag }}
+          git checkout "${{ steps.get_tag.outputs.pwsh_tag }}"
 
       - name: Import build.psm1 and run commands
         shell: pwsh
@@ -117,16 +114,16 @@ jobs:
         run: |
           git clone https://github.com/PowerShell/PowerShell.git pwsh-src
           cd pwsh-src
-          git checkout ${{ steps.get_tag_extract.outputs.pwsh_tag }}
+          git checkout "${{ steps.get_tag_extract.outputs.pwsh_tag }}"
 
       - name: Extract archive into PowerShell repo
         run: |
-          tar -xzvf downloaded-tar/powershell-gen.tar.gz -C pwsh-src
+            tar -xzvf "downloaded-tar/powershell-gen.tar.gz" -C "pwsh-src"
 
       - name: Detect dotnet SDK version from global.json
         id: detect-sdk
         run: |
-          sdk_version=$(jq -r '.sdk.version' pwsh-src/global.json)
+          sdk_version="$(jq -r '.sdk.version' "pwsh-src/global.json")"
           echo "Detected SDK version: $sdk_version"
           echo "sdk_version=$sdk_version" >> $GITHUB_OUTPUT
 
@@ -134,8 +131,8 @@ jobs:
         run: |
           curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
           chmod +x dotnet-install.sh
-          ./dotnet-install.sh --version ${{ steps.detect-sdk.outputs.sdk_version }} --install-dir $HOME/.dotnet
-          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          ./dotnet-install.sh --version "${{ steps.detect-sdk.outputs.sdk_version }}" --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> "$GITHUB_PATH"
 
       - name: Set .NET RuntimeIdentifier
         id: set-runtime
@@ -152,8 +149,9 @@ jobs:
       - name: Build PowerShell with dotnet
         run: |
           cd pwsh-src/src/powershell-unix
-          $HOME/.dotnet/dotnet restore --source https://api.nuget.org/v3/index.json
-          $HOME/.dotnet/dotnet publish . \
+          framework_ver=$("$HOME/.dotnet/dotnet" --version | cut -d. -f1,2)
+          "$HOME/.dotnet/dotnet" restore --source https://api.nuget.org/v3/index.json
+          "$HOME/.dotnet/dotnet" publish . \
             -p:GenerateFullPaths=true \
             -p:ErrorOnDuplicatePublishOutputFiles=false \
             -p:IsWindows=false \
@@ -163,17 +161,17 @@ jobs:
             -p:SDKToUse=Microsoft.NET.Sdk \
             --self-contained \
             --configuration Release \
-            --framework net$($HOME/.dotnet/dotnet --version | cut -d. -f1,2) \
-            --runtime linux-${{ steps.set-runtime.outputs.rid_arch }}
+            --framework "net${framework_ver}" \
+            --runtime "linux-${{ steps.set-runtime.outputs.rid_arch }}"
 
       - name: Debug list files before move
         run: |
           echo "Current Directory: $(pwd)"
           echo "Listing downloaded-tar contents:"
-          ls -l downloaded-tar
+          ls -l "downloaded-tar"
 
           echo "Listing PowerShell/patch directory:"
-          ls -l PowerShell/patch || echo "PowerShell/patch does not exist!"
+            ls -l "PowerShell/patch" || echo "PowerShell/patch does not exist!"
 
       - name: Move downloaded tar to PowerShell/patch with versioned name
         run: |
@@ -185,7 +183,7 @@ jobs:
             exit 1
           fi
 
-          mv downloaded-tar/powershell-gen.tar.gz PowerShell/patch/powershell-gen-v${version}.tar.gz
+          mv "downloaded-tar/powershell-gen.tar.gz" "PowerShell/patch/powershell-gen-v${version}.tar.gz"
 
           echo "Post-move PowerShell/patch contents:"
           ls -l PowerShell/patch
@@ -196,10 +194,14 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add PowerShell/patch/powershell-gen-v*.tar.gz
+          # Add any generated tar files if they exist
+          shopt -s nullglob
+          for f in PowerShell/patch/powershell-gen-v*.tar.gz; do
+            git add -- "${f}"
+          done
           if ! git diff --cached --quiet; then
             git commit -m "Add/update powershell-gen tar for ${{ steps.get_tag_extract.outputs.pwsh_tag }}"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:${GITHUB_REF#refs/heads/}
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF#refs/heads/}"
           else
             echo "No changes to commit."
           fi
