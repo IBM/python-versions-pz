@@ -200,7 +200,7 @@ jobs:
             git add -- "${f}"
           done
           if ! git diff --cached --quiet; then
-            git commit -m "Add/update powershell-gen tar for ${{ steps.get_tag_extract.outputs.pwsh_tag }}"
+            git commit -s -m "Add/update powershell-gen tar for ${{ steps.get_tag_extract.outputs.pwsh_tag }}"
             git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF#refs/heads/}"
           else
             echo "No changes to commit."
