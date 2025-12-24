@@ -8,28 +8,26 @@ SUFFIXES = (".tar.gz", ".sbom.json", ".json", ".log")
 
 
 def validate_download_url(url: str, owner: str, repo: str, tag: str, filename: str) -> bool:
-    """Validate that download_url is well-formed and points to expected release asset."""
+    """Validate that download_url is well-formed and points to a release asset.
+    
+    Note: GitHub may initially serve assets via temporary "untagged" URLs.
+    We validate the basic structure and accept it, knowing we'll construct
+    the final URL ourselves to avoid issues with ephemeral URLs.
+    """
     if not url or not url.strip():
         return False
     
-    # Must be HTTPS
+    # Must be HTTPS and from GitHub releases
     if not url.startswith("https://github.com/"):
         return False
     
-    # Must match pattern: https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}
-    expected_prefix = f"https://github.com/{owner}/{repo}/releases/download/{tag}/"
-    if not url.startswith(expected_prefix):
+    # Must be from the correct owner/repo releases
+    expected_base = f"https://github.com/{owner}/{repo}/releases/download/"
+    if not url.startswith(expected_base):
         return False
     
-    # Extract asset name from URL and verify it matches expected filename
-    asset_name = url[len(expected_prefix):]
-    if asset_name != filename:
-        return False
-    
-    # Reject untagged releases (ephemeral URLs)
-    if "/releases/download/untagged-" in url:
-        return False
-    
+    # URL structure is valid - we'll construct the final URL ourselves
+    # to avoid issues with temporary "untagged-" URLs from GitHub
     return True
 
 
@@ -83,7 +81,7 @@ def build_manifest_entries(tag: str, assets: List[Dict[str, Any]], owner: str, r
 
         download_url = asset.get("browser_download_url", "")
         
-        # Validate URL
+        # Validate URL structure (basic sanity check)
         if not validate_download_url(download_url, owner, repo, tag, name):
             errors.append(
                 f"Invalid download_url for '{name}': expected "
@@ -92,6 +90,10 @@ def build_manifest_entries(tag: str, assets: List[Dict[str, Any]], owner: str, r
             )
             continue
 
+        # Construct the permanent, tagged download URL to avoid "untagged-*" ephemeral URLs
+        # GitHub may initially serve assets via temporary URLs, so we construct the final one
+        final_download_url = f"https://github.com/{owner}/{repo}/releases/download/{tag}/{name}"
+
         entries.append(
             {
                 "version": tag,
@@ -99,7 +101,7 @@ def build_manifest_entries(tag: str, assets: List[Dict[str, Any]], owner: str, r
                 "arch": parsed["arch"],
                 "platform": parsed["platform"],
                 "platform_version": parsed["platform_version"],
-                "download_url": download_url,
+                "download_url": final_download_url,
             }
         )
     
