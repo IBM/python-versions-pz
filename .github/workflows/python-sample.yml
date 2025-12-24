@@ -25,7 +25,7 @@ jobs:
       - name: Set up Python
         uses: IBM/setup-python-pz@main
         with:
-          python-version: 3.13.4
+          python-version: 3.14
           architecture: ${{ matrix.arch }}
       
       - name: Test Python installation
