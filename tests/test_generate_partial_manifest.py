@@ -18,9 +18,14 @@ def test_validate_download_url_empty():
 
 
 def test_validate_download_url_untagged_release():
-    """Test that untagged releases are rejected."""
+    """Test that untagged releases are accepted (GitHub temporarily serves these).
+    
+    The validate function only checks basic structure. The final URL is constructed
+    in build_manifest_entries() to avoid ephemeral 'untagged' URLs.
+    """
     url = "https://github.com/IBM/python-versions-pz/releases/download/untagged-abc123/python-3.13.3-linux-22.04-ppc64le.tar.gz"
-    assert not gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
+    # Untagged URLs are accepted at validation level
+    assert gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
 
 
 def test_validate_download_url_wrong_owner():
@@ -30,15 +35,25 @@ def test_validate_download_url_wrong_owner():
 
 
 def test_validate_download_url_wrong_tag():
-    """Test URL validation with wrong tag."""
+    """Test URL validation with wrong tag.
+    
+    Note: validate_download_url only checks basic structure (HTTPS, owner, repo).
+    The final URL with correct tag is constructed in build_manifest_entries().
+    """
     url = "https://github.com/IBM/python-versions-pz/releases/download/3.12.0/python-3.13.3-linux-22.04-ppc64le.tar.gz"
-    assert not gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
+    # At validation level, URL structure is accepted (will be reconstructed later)
+    assert gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
 
 
 def test_validate_download_url_wrong_filename():
-    """Test URL validation with mismatched filename."""
+    """Test URL validation with mismatched filename.
+    
+    Note: validate_download_url only checks basic structure (HTTPS, owner, repo).
+    The filename is used to construct the final URL in build_manifest_entries().
+    """
     url = "https://github.com/IBM/python-versions-pz/releases/download/3.13.3/python-3.12.0-linux-22.04-ppc64le.tar.gz"
-    assert not gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
+    # At validation level, URL structure is accepted (will be reconstructed with correct filename)
+    assert gpm.validate_download_url(url, "IBM", "python-versions-pz", "3.13.3", "python-3.13.3-linux-22.04-ppc64le.tar.gz")
 
 
 def test_parse_filename_valid_asset():
@@ -80,11 +95,11 @@ def test_build_manifest_entries_filters_assets():
 
 
 def test_build_manifest_entries_invalid_urls():
-    """Test that invalid URLs are rejected with validation errors."""
+    """Test that URLs from wrong owner/repo are still rejected."""
     assets = [
         {
             "name": "python-3.13.3-linux-22.04-ppc64le.tar.gz",
-            "browser_download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.0/python-3.13.3-linux-22.04-ppc64le.tar.gz",  # Wrong tag
+            "browser_download_url": "https://github.com/WRONG-OWNER/python-versions-pz/releases/download/3.13.3/python-3.13.3-linux-22.04-ppc64le.tar.gz",
         },
     ]
 
@@ -156,11 +171,11 @@ def test_main_outputs_manifest_from_file(monkeypatch, capsys, tmp_path):
 
 
 def test_main_rejects_invalid_urls(monkeypatch, capsys):
-    """Test that main() rejects invalid URLs and returns error code."""
+    """Test that main() rejects URLs from wrong owner and returns error code."""
     assets = [
         {
             "name": "python-3.13.3-linux-22.04-ppc64le.tar.gz",
-            "browser_download_url": "https://github.com/IBM/python-versions-pz/releases/download/untagged-abc123/python-3.13.3-linux-22.04-ppc64le.tar.gz",
+            "browser_download_url": "https://github.com/WRONG-OWNER/python-versions-pz/releases/download/3.13.3/python-3.13.3-linux-22.04-ppc64le.tar.gz",
         }
     ]
     args = [
