@@ -5,6 +5,13 @@
     "release_url": "",
     "files": [
       {
+        "filename": "python-3.14.2-linux-24.04-ppc64le.tar.gz",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "24.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/python-3.14.2-linux-24.04-ppc64le.tar.gz"
+      },
+      {
         "filename": "python-3.14.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
@@ -12,11 +19,46 @@
         "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/python-3.14.2-linux-22.04-ppc64le.tar.gz"
       },
       {
-        "filename": "python-3.14.2-linux-24.04-ppc64le.tar.gz",
+        "filename": "trivy-python-3.14.2-linux-24.04-ppc64le-vuln.json",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/python-3.14.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/trivy-python-3.14.2-linux-24.04-ppc64le-vuln.json"
+      },
+      {
+        "filename": "trivy-python-3.14.2-linux-24.04-ppc64le-secret.json",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "24.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/trivy-python-3.14.2-linux-24.04-ppc64le-secret.json"
+      },
+      {
+        "filename": "trivy-python-3.14.2-linux-22.04-ppc64le-vuln.json",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "22.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/trivy-python-3.14.2-linux-22.04-ppc64le-vuln.json"
+      },
+      {
+        "filename": "trivy-python-3.14.2-linux-22.04-ppc64le-secret.json",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "22.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/trivy-python-3.14.2-linux-22.04-ppc64le-secret.json"
+      },
+      {
+        "filename": "python-3.14.2-linux-24.04-ppc64le.sbom.json",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "24.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/python-3.14.2-linux-24.04-ppc64le.sbom.json"
+      },
+      {
+        "filename": "python-3.14.2-linux-22.04-ppc64le.sbom.json",
+        "arch": "ppc64le",
+        "platform": "linux",
+        "platform_version": "22.04",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.2/python-3.14.2-linux-22.04-ppc64le.sbom.json"
       }
     ]
   }
