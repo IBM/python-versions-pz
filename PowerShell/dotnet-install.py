@@ -14,7 +14,9 @@ import tempfile
 import shutil
 import json
 import urllib.request
+import urllib.error
 import bisect
+import time
 from typing import Optional, List, Tuple, NamedTuple
 
 # Third-party imports
@@ -25,6 +27,8 @@ GH_USER = "IBM"
 GH_REPO = "dotnet-s390x"
 INSTALL_DIR = "/usr/share/dotnet"
 NUGET_PACKAGE = "microsoft.netcore.app.runtime.linux-x64"
+FETCH_MAX_RETRIES = 8
+FETCH_RETRY_DELAY = 5
 
 app = typer.Typer()
 
@@ -172,11 +176,25 @@ def find_closest_version_tag(all_tags: List[dict], input_tag: str) -> str:
 PROFILE_SCRIPT = "/etc/profile.d/dotnet.sh"
 
 def fetch_json(url: str) -> List[dict]:
-    """Download and parse JSON response from a given URL."""
-    with urllib.request.urlopen(url) as response:
-        if response.status >= 400:
-            raise typer.Exit(f"❌ Failed to fetch {url}")
-        return json.loads(response.read())
+    """Download and parse JSON response from a given URL with basic retries."""
+    for attempt in range(FETCH_MAX_RETRIES):
+        try:
+            with urllib.request.urlopen(url) as response:
+                if response.status >= 400:
+                    raise typer.Exit(f"❌ Failed to fetch {url}")
+                return json.loads(response.read())
+        except urllib.error.HTTPError as exc:  # Retry transient HTTP errors
+            if exc.code in [500, 502, 503, 504] and attempt < FETCH_MAX_RETRIES - 1:
+                typer.echo(f"⚠️ HTTP {exc.code} fetching {url}. Retrying in {FETCH_RETRY_DELAY}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
+                time.sleep(FETCH_RETRY_DELAY)
+                continue
+            raise
+        except Exception as exc:
+            if attempt < FETCH_MAX_RETRIES - 1:
+                typer.echo(f"⚠️ Error fetching {url}: {exc}. Retrying in {FETCH_RETRY_DELAY}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
+                time.sleep(FETCH_RETRY_DELAY)
+                continue
+            raise
 
 def get_all_tags() -> List[dict]:
     """Fetch all release tags from the IBM GitHub repository."""
