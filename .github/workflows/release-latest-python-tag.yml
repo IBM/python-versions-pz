@@ -12,6 +12,11 @@ permissions:
   contents: read     # Required for checkout and reading repository content
   actions: write     # Required for calling reusable workflows
 
+# Keep only one release-latest run per ref to avoid overlapping build/release pipelines.
+concurrency:
+  group: release-latest-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   get-latest-tag:
     runs-on: ubuntu-latest
@@ -50,25 +55,88 @@ jobs:
   build-and-release-matrix:
     needs: get-latest-tag
     strategy:
+      fail-fast: false # Allow other legs to proceed even if one fails
       matrix:
+        arch: ['ppc64le', 's390x']
         platform-version: ['24.04', '22.04']
-        include:
-          - arch: ppc64le
-            runner-label: ubuntu-24.04-ppc64le
-          - arch: s390x
-            runner-label: ubuntu-24.04-s390x
     uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
     with:
       arch: ${{ matrix.arch }}
       tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
       platform-version: ${{ matrix.platform-version }}
-      runner-label: ${{ matrix.runner-label }}
+      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'], matrix.arch) }}
 
   release-asset:
     needs: [build-and-release-matrix, get-latest-tag]
+    if: always() && !cancelled()
+    permissions:
+      contents: write
+      actions: read
     uses: ./.github/workflows/reusable-release-python-tar.yml
     with:
       tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-manifests:
+    needs: release-asset
+    if: always() && needs.release-asset.result != 'skipped' && needs.release-asset.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: manifests-${{ github.ref }} # Shared with other workflows so only one manifest push happens at a time
+      cancel-in-progress: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download partial manifest artifacts # Pull the short-lived JSON blobs produced by the release job
+        continue-on-error: true # Missing artifacts just mean no new manifests
+        uses: actions/download-artifact@v4
+        with:
+          path: manifest-parts
+          pattern: manifest-part-*
+          merge-multiple: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --no-interaction --no-ansi
+
+      - name: Apply partial manifests # Converts partials into tracked versions-manifests/*.json files
+        run: |
+          poetry run python .github/scripts/apply_partial_manifests.py \
+            --partials-dir manifest-parts \
+            --manifest-dir versions-manifests
+
+      - name: Commit manifest updates
+        id: commit_manifests
+        run: |
+          if git status --porcelain -- versions-manifests | grep .; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add versions-manifests/*.json
+            git commit -s -m "Apply manifest partials [skip ci]"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No manifest changes detected"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push manifest updates
+        if: steps.commit_manifests.outputs.committed == 'true'
+        run: |
+          # Keep freshly generated manifest files if a conflict arises
+          git pull --rebase --strategy=recursive --strategy-option=ours
+          git push
 
