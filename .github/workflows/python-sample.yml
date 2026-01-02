@@ -21,10 +21,10 @@ jobs:
           # --------------------------------------------------------
           # 2. Native Hardware Runners (Self-Hosted/Custom Labels)
           # --------------------------------------------------------
-          - runner: ubuntu-22.04-ppc64le
+          - runner: ubuntu-24.04-ppc64le
             arch: ppc64le
             
-          - runner: ubuntu-22.04-s390
+          - runner: ubuntu-24.04-s390
             arch: s390x
 
     # Dynamically sets the runner environment based on the matrix selection
