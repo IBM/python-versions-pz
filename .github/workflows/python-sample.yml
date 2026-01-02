@@ -24,7 +24,7 @@ jobs:
           - runner: ubuntu-24.04-ppc64le
             arch: ppc64le
             
-          - runner: ubuntu-24.04-s390
+          - runner: ubuntu-24.04-s390x
             arch: s390x
 
     # Dynamically sets the runner environment based on the matrix selection
