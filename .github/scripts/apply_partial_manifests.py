@@ -63,11 +63,16 @@ def main() -> int:
 
     if not partials_path.exists():
         print(f"No partial manifests found in {partials_path}")
+        # Return 0 (success) intentionally: in CI workflows, it's expected that
+        # sometimes there are no partial manifests to apply (e.g., no new builds).
+        # This prevents unnecessary workflow failures.
         return 0
 
     files = discover_partial_files(partials_path)
     if not files:
         print(f"No JSON files discovered under {partials_path}")
+        # Return 0 (success) intentionally: same rationale as above.
+        # No work to do is not a failure condition.
         return 0
 
     entries: List[Tuple[Path, dict]] = []

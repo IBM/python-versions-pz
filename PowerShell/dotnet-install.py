@@ -185,14 +185,18 @@ def fetch_json(url: str) -> List[dict]:
                 return json.loads(response.read())
         except urllib.error.HTTPError as exc:  # Retry transient HTTP errors
             if exc.code in [500, 502, 503, 504] and attempt < FETCH_MAX_RETRIES - 1:
-                typer.echo(f"⚠️ HTTP {exc.code} fetching {url}. Retrying in {FETCH_RETRY_DELAY}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
-                time.sleep(FETCH_RETRY_DELAY)
+                delay = FETCH_RETRY_DELAY * (2 ** attempt)
+                typer.echo(f"⚠️ HTTP {exc.code} fetching {url}. Retrying in {delay}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
+                time.sleep(delay)
                 continue
             raise
         except Exception as exc:
+            # Catch-all to handle unexpected errors (e.g., network timeouts, DNS failures)
+            # that aren't covered by HTTPError. Ensures retry loop remains robust.
             if attempt < FETCH_MAX_RETRIES - 1:
-                typer.echo(f"⚠️ Error fetching {url}: {exc}. Retrying in {FETCH_RETRY_DELAY}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
-                time.sleep(FETCH_RETRY_DELAY)
+                delay = FETCH_RETRY_DELAY * (2 ** attempt)
+                typer.echo(f"⚠️ Error fetching {url}: {exc}. Retrying in {delay}s... ({attempt + 1}/{FETCH_MAX_RETRIES})")
+                time.sleep(delay)
                 continue
             raise
 
