@@ -34,6 +34,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Print Architecture and OS
+        run: |
+          echo "::group::Current Environment"
+          echo "Runner: ${{ matrix.runner }}"
+          echo "Matrix Architecture: ${{ matrix.arch }}"
+          echo "OS: $(uname -s)"
+          echo "Architecture (uname -m): $(uname -m)"
+          echo "Kernel Release: $(uname -r)"
+          echo "::endgroup::"
+
       # ----------------------------------------------------------------
       # Setup Python using your custom action.
       # No QEMU is needed because:
@@ -44,7 +54,7 @@ jobs:
       - name: Set up Python
         uses: IBM/setup-python-pz@main
         with:
-          python-version: 3.13.4
+          python-version: 3.13.4.2
           architecture: ${{ matrix.arch }}
       
       - name: Verify Installation & Hardware
