@@ -11,15 +11,28 @@ permissions:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x64
+          - runner: ubuntu-24.04-ppc64le
+            arch: ppc64le
+          - runner: ubuntu-24.04-s390x
+            arch: s390x
+
+    runs-on: ${{ matrix.runner }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: IBM/setup-python-pz@main
         with:
           python-version: "3.13"
+          architecture: ${{ matrix.arch }}
 
       - name: Install dependencies
         run: |
