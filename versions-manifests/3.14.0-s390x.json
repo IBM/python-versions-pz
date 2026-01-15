@@ -5,13 +5,6 @@
     "release_url": "",
     "files": [
       {
-        "filename": "python-3.14.0-linux-24.04-s390x.tar.gz",
-        "arch": "s390x",
-        "platform": "linux",
-        "platform_version": "24.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-24.04-s390x.tar.gz"
-      },
-      {
         "filename": "python-3.14.0-linux-22.04-s390x.tar.gz",
         "arch": "s390x",
         "platform": "linux",
@@ -19,32 +12,11 @@
         "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-22.04-s390x.tar.gz"
       },
       {
-        "filename": "trivy-python-3.14.0-linux-24.04-s390x-secret.json",
+        "filename": "python-3.14.0-linux-24.04-s390x.tar.gz",
         "arch": "s390x",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/trivy-python-3.14.0-linux-24.04-s390x-secret.json"
-      },
-      {
-        "filename": "trivy-python-3.14.0-linux-22.04-s390x-secret.json",
-        "arch": "s390x",
-        "platform": "linux",
-        "platform_version": "22.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/trivy-python-3.14.0-linux-22.04-s390x-secret.json"
-      },
-      {
-        "filename": "python-3.14.0-linux-24.04-s390x.sbom.json",
-        "arch": "s390x",
-        "platform": "linux",
-        "platform_version": "24.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-24.04-s390x.sbom.json"
-      },
-      {
-        "filename": "python-3.14.0-linux-22.04-s390x.sbom.json",
-        "arch": "s390x",
-        "platform": "linux",
-        "platform_version": "22.04",
-        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-22.04-s390x.sbom.json"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-24.04-s390x.tar.gz"
       }
     ]
   }
