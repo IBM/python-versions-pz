@@ -4160,14 +4160,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.4/python-3.13.4-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.4/python-3.13.4-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.13.4-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.4/python-3.13.4-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.4/python-3.13.4-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -4321,14 +4321,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.3/python-3.13.3-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.3/python-3.13.3-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.13.3-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.3/python-3.13.3-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.3/python-3.13.3-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -4482,14 +4482,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.2/python-3.13.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.2/python-3.13.2-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.13.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.2/python-3.13.2-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.2/python-3.13.2-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -4643,14 +4643,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.1/python-3.13.1-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.1/python-3.13.1-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.13.1-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.1/python-3.13.1-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.1/python-3.13.1-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -4804,14 +4804,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.0/python-3.13.0-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.0/python-3.13.0-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.13.0-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.13.0/python-3.13.0-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.13.0/python-3.13.0-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -5693,14 +5693,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.11/python-3.12.11-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.11/python-3.12.11-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.11-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.11/python-3.12.11-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.11/python-3.12.11-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -5784,14 +5784,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.10/python-3.12.10-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.10/python-3.12.10-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.10-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.10/python-3.12.10-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.10/python-3.12.10-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -5875,14 +5875,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.9/python-3.12.9-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.9/python-3.12.9-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.9-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.9/python-3.12.9-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.9/python-3.12.9-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -5966,14 +5966,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.8/python-3.12.8-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.8/python-3.12.8-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.8-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.8/python-3.12.8-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.8/python-3.12.8-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6057,14 +6057,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.7/python-3.12.7-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.7/python-3.12.7-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.7-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.7/python-3.12.7-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.7/python-3.12.7-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6148,14 +6148,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.6/python-3.12.6-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.6/python-3.12.6-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.6-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.6/python-3.12.6-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.6/python-3.12.6-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6239,14 +6239,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.5/python-3.12.5-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.5/python-3.12.5-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.5-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.5/python-3.12.5-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.5/python-3.12.5-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6330,14 +6330,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.4/python-3.12.4-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.4/python-3.12.4-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.4-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.4/python-3.12.4-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.4/python-3.12.4-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6421,14 +6421,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.3/python-3.12.3-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.3/python-3.12.3-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.3-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.3/python-3.12.3-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.3/python-3.12.3-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6512,14 +6512,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.2/python-3.12.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.2/python-3.12.2-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.2/python-3.12.2-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.2/python-3.12.2-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6603,14 +6603,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.1/python-3.12.1-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.1/python-3.12.1-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.1-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.1/python-3.12.1-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.1/python-3.12.1-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -6694,14 +6694,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.0/python-3.12.0-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.0/python-3.12.0-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.12.0-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.12.0/python-3.12.0-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.12.0/python-3.12.0-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7464,14 +7464,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.13/python-3.11.13-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.13/python-3.11.13-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.13-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.13/python-3.11.13-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.13/python-3.11.13-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7520,14 +7520,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.12/python-3.11.12-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.12/python-3.11.12-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.12-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.12/python-3.11.12-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.12/python-3.11.12-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7576,14 +7576,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.11/python-3.11.11-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.11/python-3.11.11-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.11-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.11/python-3.11.11-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.11/python-3.11.11-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7632,14 +7632,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.10/python-3.11.10-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.10/python-3.11.10-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.10-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.10/python-3.11.10-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.10/python-3.11.10-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7723,14 +7723,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.9/python-3.11.9-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.9/python-3.11.9-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.9-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.9/python-3.11.9-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.9/python-3.11.9-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7814,14 +7814,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.8/python-3.11.8-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.8/python-3.11.8-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.8-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.8/python-3.11.8-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.8/python-3.11.8-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7905,14 +7905,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.7/python-3.11.7-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.7/python-3.11.7-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.7-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.7/python-3.11.7-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.7/python-3.11.7-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -7996,14 +7996,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.6/python-3.11.6-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.6/python-3.11.6-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.6-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.6/python-3.11.6-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.6/python-3.11.6-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8087,14 +8087,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.5/python-3.11.5-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.5/python-3.11.5-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.5-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.5/python-3.11.5-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.5/python-3.11.5-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8178,14 +8178,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.4/python-3.11.4-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.4/python-3.11.4-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.4-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.4/python-3.11.4-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.4/python-3.11.4-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8269,14 +8269,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.3/python-3.11.3-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.3/python-3.11.3-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.3-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.3/python-3.11.3-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.3/python-3.11.3-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8360,14 +8360,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.2/python-3.11.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.2/python-3.11.2-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.2/python-3.11.2-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.2/python-3.11.2-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8451,14 +8451,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.1/python-3.11.1-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.1/python-3.11.1-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.1-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.1/python-3.11.1-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.1/python-3.11.1-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -8542,14 +8542,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.0/python-3.11.0-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.0/python-3.11.0-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.11.0-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.11.0/python-3.11.0-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.11.0/python-3.11.0-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9277,14 +9277,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.18/python-3.10.18-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.18/python-3.10.18-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.18-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.18/python-3.10.18-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.18/python-3.10.18-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9340,14 +9340,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.17/python-3.10.17-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.17/python-3.10.17-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.17-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.17/python-3.10.17-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.17/python-3.10.17-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9403,14 +9403,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.16/python-3.10.16-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.16/python-3.10.16-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.16-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.16/python-3.10.16-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.16/python-3.10.16-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9466,14 +9466,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.15/python-3.10.15-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.15/python-3.10.15-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.15-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.15/python-3.10.15-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.15/python-3.10.15-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9529,14 +9529,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.14/python-3.10.14-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.14/python-3.10.14-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.14-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.14/python-3.10.14-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.14/python-3.10.14-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9592,14 +9592,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.13/python-3.10.13-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.13/python-3.10.13-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.13-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.13/python-3.10.13-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.13/python-3.10.13-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9655,14 +9655,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.12/python-3.10.12-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.12/python-3.10.12-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.12-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.12/python-3.10.12-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.12/python-3.10.12-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9739,14 +9739,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.11/python-3.10.11-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.11/python-3.10.11-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.11-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.11/python-3.10.11-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.11/python-3.10.11-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9823,14 +9823,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.10/python-3.10.10-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.10/python-3.10.10-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.10-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.10/python-3.10.10-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.10/python-3.10.10-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9907,14 +9907,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.9/python-3.10.9-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.9/python-3.10.9-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.9-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.9/python-3.10.9-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.9/python-3.10.9-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -9991,14 +9991,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.8/python-3.10.8-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.8/python-3.10.8-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.8-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.8/python-3.10.8-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.8/python-3.10.8-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10075,14 +10075,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.7/python-3.10.7-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.7/python-3.10.7-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.7-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.7/python-3.10.7-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.7/python-3.10.7-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10159,14 +10159,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.6/python-3.10.6-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.6/python-3.10.6-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.6-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.6/python-3.10.6-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.6/python-3.10.6-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10243,14 +10243,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.5/python-3.10.5-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.5/python-3.10.5-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.5-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.5/python-3.10.5-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.5/python-3.10.5-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10327,14 +10327,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.4/python-3.10.4-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.4/python-3.10.4-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.4-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.4/python-3.10.4-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.4/python-3.10.4-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10383,14 +10383,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.3/python-3.10.3-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.3/python-3.10.3-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.3-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.3/python-3.10.3-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.3/python-3.10.3-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10439,14 +10439,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.2/python-3.10.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.2/python-3.10.2-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.2/python-3.10.2-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.2/python-3.10.2-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10495,14 +10495,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.1/python-3.10.1-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.1/python-3.10.1-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.1-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.1/python-3.10.1-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.1/python-3.10.1-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -10551,14 +10551,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.0/python-3.10.0-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.0/python-3.10.0-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.10.0-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.10.0/python-3.10.0-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.10.0/python-3.10.0-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11307,14 +11307,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.23/python-3.9.23-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.23/python-3.9.23-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.23-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.23/python-3.9.23-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.23/python-3.9.23-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11370,14 +11370,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.22/python-3.9.22-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.22/python-3.9.22-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.22-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.22/python-3.9.22-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.22/python-3.9.22-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11433,14 +11433,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.21/python-3.9.21-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.21/python-3.9.21-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.21-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.21/python-3.9.21-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.21/python-3.9.21-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11496,14 +11496,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.20/python-3.9.20-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.20/python-3.9.20-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.20-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.20/python-3.9.20-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.20/python-3.9.20-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11559,14 +11559,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.19/python-3.9.19-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.19/python-3.9.19-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.19-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.19/python-3.9.19-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.19/python-3.9.19-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11622,14 +11622,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.18/python-3.9.18-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.18/python-3.9.18-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.18-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.18/python-3.9.18-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.18/python-3.9.18-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11685,14 +11685,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.17/python-3.9.17-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.17/python-3.9.17-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.17-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.17/python-3.9.17-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.17/python-3.9.17-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11748,14 +11748,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.16/python-3.9.16-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.16/python-3.9.16-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.16-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.16/python-3.9.16-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.16/python-3.9.16-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11811,14 +11811,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.15/python-3.9.15-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.15/python-3.9.15-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.15-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.15/python-3.9.15-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.15/python-3.9.15-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11874,14 +11874,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.14/python-3.9.14-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.14/python-3.9.14-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.14-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.14/python-3.9.14-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.14/python-3.9.14-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -11958,14 +11958,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.13/python-3.9.13-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.13/python-3.9.13-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.13-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.13/python-3.9.13-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.13/python-3.9.13-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12042,14 +12042,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.12/python-3.9.12-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.12/python-3.9.12-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.12-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.12/python-3.9.12-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.12/python-3.9.12-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12098,14 +12098,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.11/python-3.9.11-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.11/python-3.9.11-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.11-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.11/python-3.9.11-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.11/python-3.9.11-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12154,14 +12154,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.10/python-3.9.10-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.10/python-3.9.10-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.10-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.10/python-3.9.10-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.10/python-3.9.10-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12210,14 +12210,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.9/python-3.9.9-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.9/python-3.9.9-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.9-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.9/python-3.9.9-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.9/python-3.9.9-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12266,14 +12266,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.8/python-3.9.8-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.8/python-3.9.8-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.8-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.8/python-3.9.8-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.8/python-3.9.8-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12322,14 +12322,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.7/python-3.9.7-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.7/python-3.9.7-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.7-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.7/python-3.9.7-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.7/python-3.9.7-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12378,14 +12378,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.6/python-3.9.6-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.6/python-3.9.6-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.6-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.6/python-3.9.6-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.6/python-3.9.6-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12441,14 +12441,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.5/python-3.9.5-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.5/python-3.9.5-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.5-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.5/python-3.9.5-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.5/python-3.9.5-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12504,14 +12504,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.4/python-3.9.4-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.4/python-3.9.4-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.4-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.4/python-3.9.4-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.4/python-3.9.4-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12567,14 +12567,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.3/python-3.9.3-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.3/python-3.9.3-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.3-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.3/python-3.9.3-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.3/python-3.9.3-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12630,14 +12630,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.2/python-3.9.2-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.2/python-3.9.2-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.2-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.2/python-3.9.2-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.2/python-3.9.2-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12742,14 +12742,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.1/python-3.9.1-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.1/python-3.9.1-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.1-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.1/python-3.9.1-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.1/python-3.9.1-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
@@ -12854,14 +12854,14 @@
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "24.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.0/python-3.9.0-linux-24.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.0/python-3.9.0-linux-24.04-ppc64le.tar.gz"
       },
       {
         "filename": "python-3.9.0-linux-22.04-ppc64le.tar.gz",
         "arch": "ppc64le",
         "platform": "linux",
         "platform_version": "22.04",
-        "download_url": "https://github.com/adilhusain-s/actions-runner-python-versions/releases/download/3.9.0/python-3.9.0-linux-22.04-ppc64le.tar.gz"
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.9.0/python-3.9.0-linux-22.04-ppc64le.tar.gz"
       }
     ]
   },
