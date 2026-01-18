@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       files:
-        description: "Glob pattern(s) for release files passed to softprops/action-gh-release (newline separated)"
+        description: "Glob pattern(s) for release files"
         required: false
         type: string
         default: |
@@ -20,13 +20,16 @@ on:
         required: true
 
 permissions:
-  contents: write # Required for creating releases and pushing commits
-  actions: read # Required for downloading artifacts
+  contents: write # Required for creating releases
+  actions: read   # Required for downloading artifacts
 
 jobs:
-  release-assets-and-update-manifest:
+  release-assets-and-generate-json:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -37,25 +40,16 @@ jobs:
       - name: List downloaded files (debugging step)
         run: ls -R ./artifact
 
-      - name: Release all .tar.gz files from python-tar
+      - name: Release all .tar.gz files
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
           name: Release ${{ inputs.tag }}
-          files: ${{ inputs.files }} # Accept a files pattern from the calling workflow, default set on workflow_call
+          files: ${{ inputs.files }}
           draft: false
           prerelease: false
-          token: ${{ secrets.GH_TOKEN }} # Use the token passed from the calling workflow
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }} # Token needed for push operations
-
-      - name: Pull latest changes
-        # Ensure we have the latest state of the repo, especially the versions-manifests folder
-        run: git pull
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -67,142 +61,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install --no-interaction --no-ansi
-        working-directory: .
 
-      - name: Create, commit, and push arch-specific manifest for released asset
+      - name: Generate partial manifest
+        id: generate_manifest
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ASSETS_JSON: ${{ steps.create_release.outputs.assets }}
         run: |
-          assets_json='${{ steps.create_release.outputs.assets }}'
-          asset_count=$(echo "$assets_json" | jq length)
+          REPO_NAME="${{ github.repository }}" && REPO_NAME="${REPO_NAME##*/}"
+          poetry run python .github/scripts/generate_partial_manifest.py \
+            --tag "${{ inputs.tag }}" \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${REPO_NAME}" \
+            --assets "$ASSETS_JSON" \
+            > manifest-part-${{ inputs.tag }}.json
 
-          # Use a Bash associative array to group assets by their architecture
-          declare -A ARCH_ASSETS_MAP
+          echo "Generated Manifest Content:"
+          cat manifest-part-${{ inputs.tag }}.json
 
-          # First pass: Group asset indices by unique architecture from the downloaded files
-          # This handles cases where a single 'tag' might have been built for multiple platform-versions
-          # (e.g., 3.13.3-linux-22.04-ppc64le.tar.gz and 3.13.3-linux-24.04-ppc64le.tar.gz)
-          # within the same 'arch'.
-          for i in $(seq 0 $((asset_count - 1))); do
-            asset_name=$(echo "$assets_json" | jq -r ".[$i].name")
-            # Normalize and strip known prefixes and extensions we expect
-            stripped="$asset_name"
-            # Remove common prefixes 'python-' and 'trivy-python-' (for security artifacts)
-            stripped="${stripped#python-}"
-            stripped="${stripped#trivy-python-}"
-            # Remove several known extensions
-            stripped="${stripped%.tar.gz}"
-            stripped="${stripped%.sbom.json}"
-            stripped="${stripped%.json}"
-            stripped="${stripped%.log}"
-
-            # Split the stripped name into parts; expected format: <version>-<platform>-<platform_version>-<arch>[-optional]
-            IFS='-' read -r -a parts <<< "$stripped"
-            # Only group assets that include an architecture token at the expected position
-            if [ ${#parts[@]} -ge 4 ]; then
-              current_arch="${parts[3]}"
-              ARCH_ASSETS_MAP["$current_arch"]+=" $i"
-            fi
-          done
-
-          # Ensure the dedicated manifests directory exists
-          mkdir -p versions-manifests
-
-          # Second pass: Process each unique architecture found and build its manifest file
-          # We iterate over the architectures identified from the downloaded artifacts
-          for arch_key in "${!ARCH_ASSETS_MAP[@]}"; do
-            MANIFEST_FILE="versions-manifests/${{ inputs.tag }}-${arch_key}.json"
-            
-            echo "::group::Processing manifest for tag ${{ inputs.tag }}, arch ${arch_key}"
-
-            # Initialize the manifest file for this specific tag-arch combination.
-            # This will create a new empty file. If it already exists from a previous run, it will be overwritten.
-            echo "[]" > "$MANIFEST_FILE" 
-
-            # Iterate over asset indices that belong to this specific architecture
-            for asset_idx in ${ARCH_ASSETS_MAP["$arch_key"]}; do
-              asset_name=$(echo "$assets_json" | jq -r ".[$asset_idx].name")
-              download_url=$(echo "$assets_json" | jq -r ".[$asset_idx].browser_download_url")
-
-              # Normalize and strip known prefixes and extensions
-              stripped="$asset_name"
-              stripped="${stripped#python-}"
-              stripped="${stripped#trivy-python-}"
-              stripped="${stripped%.tar.gz}"
-              stripped="${stripped%.sbom.json}"
-              stripped="${stripped%.json}"
-              stripped="${stripped%.log}"
-              IFS='-' read -r -a parts <<< "$stripped"
-              # Determine fields: version, platform, platform_version, arch
-              platform="${parts[1]:-}" || true
-              platform_version="${parts[2]:-}" || true
-              actual_arch="${parts[3]:-}"
-
-              echo "  - Asset: $asset_name"
-              echo "    Platform: $platform"
-              echo "    Platform version: $platform_version"
-              echo "    Download URL: $download_url"
-
-              # Use your Python script to update the specific manifest file
-              poetry run python .github/scripts/manifest_tools.py update_version \
-                "$MANIFEST_FILE" \
-                --version "${{ inputs.tag }}" \
-                --filename "$asset_name" \
-                --arch "$actual_arch" \
-                --platform "$platform" \
-                --platform-version "$platform_version" \
-                --download-url "$download_url" \
-                --stable
-            done
-            echo "::endgroup::"
-          done
-
-          # Final step: Commit and push ALL modified arch-specific manifest files in one atomic Git operation.
-          # This is done once after all unique arch manifests for this run have been prepared.
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Add all JSON files within the versions-manifests directory that were modified
-          git add versions-manifests/*.json 
-
-          # Only commit if there are actual changes
-          git diff --staged --quiet || git commit -m "Update arch manifests for tag ${{ inputs.tag }} [skip ci]"
-
-          # Rebase before pushing to gracefully handle any concurrent pushes from other workflow runs
-          # that might have pushed different arch-specific manifests in parallel.
-          git pull --rebase
-          # Exponential back-off with jitter for push
-          max_retries=20 # Increased retries for higher concurrency 
-          base_delay=1   # Starting delay in seconds
-          max_delay=90   # Maximum delay in seconds
-          count=0
-
-          until git push; do
-            count=$((count + 1))
-            if [ $count -ge $max_retries ]; then
-              echo "Push failed after $max_retries attempts. Exiting with failure."
-              exit 1
-            fi
-
-            current_delay=$(( base_delay * (2**(count-1)) ))
-            # Cap the delay at max_delay
-            if [ "$current_delay" -gt "$max_delay" ]; then
-                current_delay="$max_delay"
-            fi
-
-            # Add jitter: +/- 25% of the current_delay (but at least 1s)
-            jitter_range=$(( current_delay / 4 ))
-            random_jitter=$(( RANDOM % (2 * jitter_range + 1) - jitter_range ))
-            sleep_duration=$(( current_delay + random_jitter ))
-
-            # Ensure sleep_duration is at least 1 second to avoid hammering the server
-            if [ "$sleep_duration" -lt 1 ]; then
-                sleep_duration=1
-            fi
-            
-            echo "Push attempt failed. Attempting to fetch, rebase, and retry ($count/$max_retries). Waiting ${sleep_duration}s..."
-            # Always rebase against the target branch to incorporate others' distinct commits
-            git fetch origin
-            git pull --rebase origin ${{ github.ref_name }} 
-            sleep "$sleep_duration"
-          done
+      - name: Upload partial manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-part-${{ inputs.tag }}
+          path: manifest-part-${{ inputs.tag }}.json
+          retention-days: 1

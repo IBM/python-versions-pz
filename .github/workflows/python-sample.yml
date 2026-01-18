@@ -1,7 +1,7 @@
-name: Run Python Sample (Native + Standard)
-
 permissions:
   contents: read
+# .github/workflows/python-sample.yml
+name: Run Python Sample (ppc64le, s390x)
 
 on:
   workflow_dispatch:
@@ -12,73 +12,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # --------------------------------------------------------
-          # 1. Standard GitHub-Hosted Runner (x64 Baseline)
-          # --------------------------------------------------------
-          - runner: ubuntu-24.04
-            arch: x64
-            
-          # --------------------------------------------------------
-          # 2. Native Hardware Runners (Self-Hosted/Custom Labels)
-          # --------------------------------------------------------
-          - runner: ubuntu-24.04-ppc64le
+          - os: ubuntu-24.04
             arch: ppc64le
-            
-          - runner: ubuntu-24.04-s390x
+          - os: ubuntu-24.04
             arch: s390x
-
-    # Dynamically sets the runner environment based on the matrix selection
-    runs-on: ${{ matrix.runner }}
-
+          - os: ubuntu-latest
+            arch: x64
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Print Architecture and OS
-        run: |
-          echo "::group::Current Environment"
-          echo "Runner: ${{ matrix.runner }}"
-          echo "Matrix Architecture: ${{ matrix.arch }}"
-          echo "OS: $(uname -s)"
-          echo "Architecture (uname -m): $(uname -m)"
-          echo "Kernel Release: $(uname -r)"
-          echo "::endgroup::"
-
-      # ----------------------------------------------------------------
-      # Setup Python using your custom action.
-      # No QEMU is needed because:
-      # - x64 runs natively on ubuntu-24.04
-      # - ppc64le runs natively on the ppc64le hardware runner
-      # - s390x runs natively on the s390 hardware runner
-      # ----------------------------------------------------------------
       - name: Set up Python
         uses: IBM/setup-python-pz@main
         with:
-          python-version: 3.14.2
+          python-version: 3.14
           architecture: ${{ matrix.arch }}
       
-      - name: Verify Installation & Hardware
+      - name: Test Python installation
         run: |
-          echo "::group::System Info"
-          echo "Hostname: $(hostname)"
-          echo "Kernel: $(uname -r)"
-          echo "Arch (reported by OS): $(uname -m)"
-          echo "::endgroup::"
-
-          echo "::group::Python Identity"
-          which python
           python --version
-          # Verify Python agrees with the OS about the architecture
-          python -c "import platform; print(f'Python Platform: {platform.machine()}')"
-          echo "::endgroup::"
-
-          echo "::group::Functional Tests"
-          # 1. Math Check
-          python -c "assert 2 + 2 == 4; print('Math: OK')"
-          
-          # 2. SSL Check (Critical for pip/networking)
-          python -c "import ssl; print(f'SSL: OK ({ssl.OPENSSL_VERSION})')"
-          
-          # 3. Ctypes/FFI Check (Often breaks on foreign archs if libs are missing)
-          python -c "import ctypes; print('Ctypes: OK')"
-          echo "::endgroup::"
+          which python
+          python -c "import sys; print('Python executable:', sys.executable)"
+          python -c "import platform; print('Platform:', platform.platform())"
+          python -c "import site; print('Site packages:', site.getsitepackages())"
+          python -m pip --version
+          python -c "import ssl; print('SSL available:', ssl.OPENSSL_VERSION)"
+          python -c "import ctypes; print('ctypes available:', hasattr(__import__('ctypes'), 'CDLL'))"
+          python -c "print('Basic math:', 2 + 2)"
