@@ -4,7 +4,13 @@ permissions:
   contents: write
 
 on:
+  pull_request: 
   workflow_dispatch:
+  push:
+    branches: 
+      - main
+    paths:
+      - "versions-manifests/**"
 
 jobs:
   merge-manifest:
@@ -14,7 +20,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
 
       - name: Fetch and pull with rebase
@@ -47,13 +53,39 @@ jobs:
           done
 
 
-      - name: Set git user
+      - name: Configure git user
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit and push main manifest
+      - name: Create branch and commit changes
         run: |
+          BRANCH="automation/update-main-manifest"
+
+          git checkout -B "$BRANCH"
+
           git add versions-manifest.json
-          git commit -m "Update main manifest [skip ci]" || echo "No changes to commit"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No changes detected, exiting."
+            exit 0
+          fi
+
+          git commit -m "Update main versions-manifest.json"
+          git push -f origin "$BRANCH"
+
+      - name: Create or update pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="automation/update-main-manifest"
+
+          if gh pr view "$BRANCH" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "PR already exists, skipping creation."
+          else
+            gh pr create \
+              --head "$BRANCH" \
+              --base main \
+              --title "Update main versions-manifest.json" \
+              --body "This PR updates \`versions-manifest.json\` by merging all architecture-specific manifests."
+          fi
