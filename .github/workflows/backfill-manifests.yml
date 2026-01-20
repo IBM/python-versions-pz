@@ -1,0 +1,184 @@
+name: Backfill Manifests
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Number of releases to process (Max 250 due to GHA matrix limits)"
+        required: false
+        default: "30"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  get-all-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch release tags
+        id: set-matrix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          # Safety Check: Matrix strategy has a hard limit of 256 jobs
+          if [ "$LIMIT" -gt 250 ]; then
+            echo "::warning::Limit $LIMIT exceeds GitHub Matrix safety. Capping at 250."
+            LIMIT=250
+          fi
+
+          echo "Fetching last $LIMIT releases..."
+          
+          TAGS=$(gh release list \
+            --limit "$LIMIT" \
+            --exclude-drafts \
+            --exclude-pre-releases \
+            --json tagName \
+            --jq '[.[] | .tagName]')
+          
+          if [ -z "$TAGS" ] || [ "$TAGS" == "[]" ]; then
+            echo "::error::No release tags found!"
+            exit 1
+          fi
+
+          echo "Found tags count: $(echo $TAGS | jq '. | length')"
+          echo "matrix=$TAGS" >> $GITHUB_OUTPUT
+
+  generate-manifests:
+    needs: get-all-tags
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10 # Slightly higher parallelization is fine for reads
+      matrix:
+        tag: ${{ fromJson(needs.get-all-tags.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+          poetry install --no-interaction --no-ansi
+
+      - name: Fetch Assets Data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::group::Fetch Assets via GitHub CLI"
+          # Fetch assets with all required fields including browser_download_url
+          gh api "repos/${{ github.repository }}/releases/tags/${{ matrix.tag }}" \
+            --jq '.assets | map({name: .name, browser_download_url: .browser_download_url})' \
+            > assets.json
+          
+          if [ ! -s assets.json ]; then
+            echo "::error::Assets file is empty for tag ${{ matrix.tag }}"
+            exit 1
+          fi
+          
+          echo "Assets fetched:"
+          cat assets.json
+          echo "::endgroup::"
+
+      - name: Generate Manifest
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          echo "::group::Run Generation Script"
+          
+          REPO_NAME="${{ github.repository }}" && REPO_NAME="${REPO_NAME##*/}"
+          
+          # We use --assets-file now instead of --assets
+          poetry run python .github/scripts/generate_partial_manifest.py \
+            --tag "${{ matrix.tag }}" \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${REPO_NAME}" \
+            --assets-file "assets.json" \
+            > manifest-part-${{ matrix.tag }}.json
+
+          cat manifest-part-${{ matrix.tag }}.json
+          echo "::endgroup::"
+
+      - name: Upload Manifest Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifest-part-${{ matrix.tag }}
+          path: manifest-part-${{ matrix.tag }}.json
+          retention-days: 1
+
+  apply-manifests:
+    needs: generate-manifests
+    if: always() && needs.generate-manifests.result != 'skipped' && needs.generate-manifests.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: manifests-backfill-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download partial manifest artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: manifest-parts
+          pattern: manifest-part-*
+          merge-multiple: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+          poetry install --no-interaction --no-ansi
+
+      - name: Apply partial manifests
+        run: |
+          poetry run python .github/scripts/apply_partial_manifests.py \
+            --partials-dir manifest-parts \
+            --manifest-dir versions-manifests
+
+      - name: Commit manifest updates
+        id: commit_manifests
+        run: |
+          if git status --porcelain -- versions-manifests | grep .; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add versions-manifests/*.json
+            git commit -s -m "Backfill manifests from workflow run [skip ci]"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No manifest changes detected"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push manifest updates
+        if: steps.commit_manifests.outputs.committed == 'true'
+        run: |
+          git pull --rebase --strategy=recursive --strategy-option=ours
+          git push
