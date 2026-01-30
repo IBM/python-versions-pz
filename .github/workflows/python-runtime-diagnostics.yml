@@ -8,7 +8,6 @@ on:
 permissions:
   contents: read
 
-
 jobs:
   proof:
     name: "Python ${{ matrix.python-version }} on ${{ matrix.arch }}"
@@ -31,13 +30,15 @@ jobs:
             python-version: "3.10"
 
     steps:
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
       # ------------------------------------------------------------
       # Python installation
       # ------------------------------------------------------------
-
       - name: Setup Python (x64)
         if: matrix.python-setup == 'actions'
         uses: actions/setup-python@v6
@@ -54,7 +55,6 @@ jobs:
       # ------------------------------------------------------------
       # Environment proof
       # ------------------------------------------------------------
-
       - name: Dump environment (proof)
         shell: bash
         run: |
@@ -77,7 +77,6 @@ jobs:
       # ------------------------------------------------------------
       # Python resolution proof
       # ------------------------------------------------------------
-
       - name: Resolve python binary
         shell: bash
         run: |
@@ -89,7 +88,6 @@ jobs:
       # ------------------------------------------------------------
       # ELF + loader proof
       # ------------------------------------------------------------
-
       - name: ELF inspection (python)
         shell: bash
         run: |
@@ -108,7 +106,6 @@ jobs:
       # ------------------------------------------------------------
       # libpython location proof
       # ------------------------------------------------------------
-
       - name: Locate libpython
         shell: bash
         run: |
@@ -125,7 +122,6 @@ jobs:
       # ------------------------------------------------------------
       # Loader cache proof
       # ------------------------------------------------------------
-
       - name: ldconfig cache
         shell: bash
         run: |
@@ -133,9 +129,8 @@ jobs:
           ldconfig -p | grep libpython || echo "libpython not in ld cache"
 
       # ------------------------------------------------------------
-      # Runtime execution proof (absolute vs relative)
+      # Runtime execution proof (PATH vs relative)
       # ------------------------------------------------------------
-
       - name: Execute python via PATH (absolute)
         shell: bash
         run: |
@@ -150,9 +145,28 @@ jobs:
           "$PYDIR/python" -VV
 
       # ------------------------------------------------------------
+      # Exec-path proof (coverage-style re-exec)
+      # ------------------------------------------------------------
+      - name: Execv test (same exec path as coverage.py)
+        shell: bash
+        run: |
+          set -eux
+
+          cat > exec_test.py <<'EOF'
+          import os, sys
+
+          print("parent python executable:", sys.executable)
+          print("parent argv:", sys.argv)
+
+          # Replace current process with a fresh python exec
+          os.execv(sys.executable, [sys.executable, "-VV"])
+          EOF
+
+          python exec_test.py
+
+      # ------------------------------------------------------------
       # Controlled experiment: inject LD_LIBRARY_PATH
       # ------------------------------------------------------------
-
       - name: Execute python with LD_LIBRARY_PATH injected
         shell: bash
         run: |
@@ -161,3 +175,4 @@ jobs:
           export LD_LIBRARY_PATH="$PYROOT/lib:${LD_LIBRARY_PATH:-}"
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
           python -VV
+
