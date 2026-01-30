@@ -1,0 +1,153 @@
+name: Python Runtime Diagnostics
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "debug-python-env" ]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # x64 (GitHub-hosted)
+          - os: ubuntu
+            os-version: latest
+            runner: ubuntu-latest
+            python-setup: actions
+            python-version: "3.10"
+
+          # ppc64le (self-hosted)
+          - os: ppc64le
+            runner: ubuntu-24.04-ppc64le
+            python-setup: ibm
+            python-version: "3.10"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      ##################################################################
+      # Setup Python
+      ##################################################################
+
+      - name: Setup Python (x64)
+        if: matrix.python-setup == 'actions'
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup Python (ppc64le)
+        if: matrix.python-setup == 'ibm'
+        uses: IBM/setup-python-pz@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ppc64le
+
+      ##################################################################
+      # Environment Snapshot
+      ##################################################################
+
+      - name: Environment snapshot
+        shell: bash
+        run: |
+          set -xe
+          echo "===== BASIC ====="
+          uname -a
+          id
+          pwd
+
+          echo "===== PATH ====="
+          echo "$PATH" | tr ':' '\n'
+
+          echo "===== LD_LIBRARY_PATH ====="
+          echo "${LD_LIBRARY_PATH:-<unset>}"
+
+          echo "===== Toolcache ====="
+          ls -R "${RUNNER_TOOL_CACHE:-/opt/hostedtoolcache}" || true
+
+      ##################################################################
+      # Python Binary Inspection (before execution)
+      ##################################################################
+
+      - name: Locate python binary
+        shell: bash
+        run: |
+          set -xe
+          which python || true
+          readlink -f "$(which python)" || true
+          ls -l "$(dirname "$(which python)")" || true
+
+      - name: ELF metadata (python binary)
+        shell: bash
+        run: |
+          set -xe
+          PY=$(readlink -f "$(which python)")
+          echo "Python binary: $PY"
+
+          echo "---- file ----"
+          file "$PY"
+
+          echo "---- readelf (RPATH/RUNPATH) ----"
+          readelf -d "$PY" | grep -E 'RPATH|RUNPATH' || echo "NO RPATH"
+
+          echo "---- ldd ----"
+          ldd "$PY" || true
+
+      ##################################################################
+      # Python shared library inspection
+      ##################################################################
+
+      - name: Locate libpython
+        shell: bash
+        run: |
+          set -xe
+          PYROOT=$(dirname "$(dirname "$(readlink -f "$(which python)")")")
+          echo "Python root: $PYROOT"
+
+          echo "---- lib dir ----"
+          ls -l "$PYROOT/lib" || true
+
+          echo "---- libpython ----"
+          ls -l "$PYROOT/lib"/libpython* || true
+
+      ##################################################################
+      # Runtime execution (this is where failures usually occur)
+      ##################################################################
+
+      - name: Execute python (minimal)
+        shell: bash
+        run: |
+          set -xe
+          python -VV
+
+      - name: Execute python (stdlib)
+        shell: bash
+        run: |
+          set -xe
+          python - << 'EOF'
+          import sys, sysconfig, ssl, ctypes
+          print("executable:", sys.executable)
+          print("version:", sys.version)
+          print("LIBDIR:", sysconfig.get_config_var("LIBDIR"))
+          EOF
+
+      ##################################################################
+      # Dynamic loader experiment
+      ##################################################################
+
+      - name: Try with LD_LIBRARY_PATH injected
+        shell: bash
+        run: |
+          set -xe
+          PYROOT=$(dirname "$(dirname "$(readlink -f "$(which python)")")")
+          export LD_LIBRARY_PATH="$PYROOT/lib:$LD_LIBRARY_PATH"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+          python -VV
