@@ -157,12 +157,12 @@ jobs:
     # ------------------------------------------------------------
     - name: Python self-report
       run: |
-        python - <<'PY'
-import sys, sysconfig, platform
-print("Executable:", sys.executable)
-print("Prefix:", sys.prefix)
-print("Exec Prefix:", sys.exec_prefix)
-print("Machine:", platform.machine())
-print("LIBDIR:", sysconfig.get_config_var("LIBDIR"))
-print("LDLIBRARY:", sysconfig.get_config_var("LDLIBRARY"))
-PY
+        python - << 'PY'
+        import sys, sysconfig, platform
+        print("Executable:", sys.executable)
+        print("Prefix:", sys.prefix)
+        print("Exec Prefix:", sys.exec_prefix)
+        print("Machine:", platform.machine())
+        print("LIBDIR:", sysconfig.get_config_var("LIBDIR"))
+        print("LDLIBRARY:", sysconfig.get_config_var("LDLIBRARY"))
+        PY
