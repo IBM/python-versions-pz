@@ -88,7 +88,7 @@ jobs:
 
     - name: Setup Python (IBM)
       if: matrix.python-setup == 'ibm'
-      id: setup
+      id: setup-ibm
       uses: IBM/setup-python-pz@v6
       with:
         python-version: ${{ matrix.python-version }}
@@ -157,7 +157,7 @@ jobs:
     # ------------------------------------------------------------
     - name: Python self-report
       run: |
-        python - << 'PY'
+        python - << 'END_PYTHON'
         import sys, sysconfig, platform
         print("Executable:", sys.executable)
         print("Prefix:", sys.prefix)
@@ -165,4 +165,4 @@ jobs:
         print("Machine:", platform.machine())
         print("LIBDIR:", sysconfig.get_config_var("LIBDIR"))
         print("LDLIBRARY:", sysconfig.get_config_var("LDLIBRARY"))
-        PY
+        END_PYTHON
