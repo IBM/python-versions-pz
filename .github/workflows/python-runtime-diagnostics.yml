@@ -17,162 +17,152 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # x64 baseline (known-good)
           - arch: x64
             runner: ubuntu-latest
             python-setup: actions
-            python-version: "3.10"
+            python-version: "3.11"
 
-          # ppc64le under investigation
           - arch: ppc64le
             runner: ubuntu-24.04-ppc64le
             python-setup: ibm
-            python-version: "3.10"
+            python-version: "3.11"
 
     steps:
-      # ------------------------------------------------------------
-      # Checkout
-      # ------------------------------------------------------------
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # Python installation
-      # ------------------------------------------------------------
-      - name: Setup Python (x64)
-        if: matrix.python-setup == 'actions'
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
+    # ------------------------------------------------------------
+    # BASELINE RUNNER ENV (FIRST STEP — BEFORE ANY MUTATION)
+    # ------------------------------------------------------------
+    - name: Baseline runner environment
+      shell: bash
+      run: |
+        set -eux
 
-      - name: Setup Python (ppc64le)
-        if: matrix.python-setup == 'ibm'
-        uses: IBM/setup-python-pz@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ppc64le
+        echo "===== ALL ENV VARS (SORTED) ====="
+        env | sort
 
-      # ------------------------------------------------------------
-      # Environment proof
-      # ------------------------------------------------------------
-      - name: Dump environment (proof)
-        shell: bash
-        run: |
-          set -eux
-          echo "===== UNAME ====="
-          uname -a
+        echo "===== RUNNER VARS ====="
+        env | grep -E '^RUNNER_' | sort || true
 
-          echo "===== USER ====="
-          id
+        echo "===== GITHUB VARS ====="
+        env | grep -E '^GITHUB_' | sort || true
 
-          echo "===== ENV ====="
-          env | sort
+        echo "===== TOOLCACHE VARS ====="
+        echo "RUNNER_TOOL_CACHE=$RUNNER_TOOL_CACHE"
+        echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY:-<unset>}"
 
-          echo "===== PATH ====="
-          echo "$PATH" | tr ':' '\n'
+        echo "===== PATH (LINE BY LINE) ====="
+        echo "$PATH" | tr ':' '\n'
 
-          echo "===== LD_LIBRARY_PATH ====="
-          echo "${LD_LIBRARY_PATH:-<unset>}"
+        echo "===== FILESYSTEM LOCATIONS ====="
+        echo "HOME=$HOME"
+        echo "PWD=$PWD"
+        ls -ld "$RUNNER_TOOL_CACHE" || true
 
-      # ------------------------------------------------------------
-      # Python resolution proof
-      # ------------------------------------------------------------
-      - name: Resolve python binary
-        shell: bash
-        run: |
-          set -eux
-          which python
-          readlink -f "$(which python)"
-          ls -l "$(dirname "$(which python)")"
+    # ------------------------------------------------------------
+    # Checkout
+    # ------------------------------------------------------------
+    - uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # ELF + loader proof
-      # ------------------------------------------------------------
-      - name: ELF inspection (python)
-        shell: bash
-        run: |
-          set -eux
-          PY="$(readlink -f "$(which python)")"
+    # ------------------------------------------------------------
+    # Runner context
+    # ------------------------------------------------------------
+    - name: Runner context
+      run: |
+        set -eux
+        cat /etc/os-release || true
+        uname -a
+        lscpu || true
+        uname -m
+        arch
+        dpkg --print-architecture || true
 
-          echo "===== file ====="
-          file "$PY"
+    # ------------------------------------------------------------
+    # Setup Python
+    # ------------------------------------------------------------
+    - name: Setup Python (actions)
+      if: matrix.python-setup == 'actions'
+      id: setup
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
 
-          echo "===== readelf (RPATH / RUNPATH) ====="
-          readelf -d "$PY" | grep -E 'RPATH|RUNPATH' || echo "NO RPATH/RUNPATH"
+    - name: Setup Python (IBM)
+      if: matrix.python-setup == 'ibm'
+      id: setup
+      uses: IBM/setup-python-pz@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ppc64le
 
-          echo "===== ldd (dependency resolution) ====="
-          ldd "$PY" || true
+    # ------------------------------------------------------------
+    # Action outputs
+    # ------------------------------------------------------------
+    - name: Action outputs
+      run: |
+        echo "python-path: ${{ steps.setup.outputs.python-path }}"
+        echo "python-version: ${{ steps.setup.outputs.python-version }}"
 
-      # ------------------------------------------------------------
-      # libpython location proof
-      # ------------------------------------------------------------
-      - name: Locate libpython
-        shell: bash
-        run: |
-          set -eux
-          PYROOT="$(dirname "$(dirname "$(readlink -f "$(which python)")")")"
-          echo "Python root: $PYROOT"
+    # ------------------------------------------------------------
+    # Environment after setup
+    # ------------------------------------------------------------
+    - name: Environment after setup
+      run: |
+        set -eux
+        echo "pythonLocation=$pythonLocation"
+        echo "RUNNER_TOOL_CACHE=$RUNNER_TOOL_CACHE"
 
-          echo "===== lib dir ====="
-          ls -l "$PYROOT/lib" || true
+        echo "PATH entries:"
+        echo "$PATH" | tr ':' '\n'
 
-          echo "===== libpython ====="
-          ls -l "$PYROOT/lib"/libpython* || true
+    # ------------------------------------------------------------
+    # Resolve python binary
+    # ------------------------------------------------------------
+    - name: Resolve python binary
+      run: |
+        set -eux
+        which python
+        readlink -f "$(which python)"
 
-      # ------------------------------------------------------------
-      # Loader cache proof
-      # ------------------------------------------------------------
-      - name: ldconfig cache
-        shell: bash
-        run: |
-          set -eux
-          ldconfig -p | grep libpython || echo "libpython not in ld cache"
+        echo "Output python-path:"
+        echo "${{ steps.setup.outputs.python-path }}"
 
-      # ------------------------------------------------------------
-      # Runtime execution proof (PATH vs relative)
-      # ------------------------------------------------------------
-      - name: Execute python via PATH (absolute)
-        shell: bash
-        run: |
-          set -eux
-          python -VV
+    # ------------------------------------------------------------
+    # Toolcache provenance
+    # ------------------------------------------------------------
+    - name: Toolcache check
+      run: |
+        set -eux
+        PY=$(readlink -f "$(which python)")
+        echo "Python binary: $PY"
 
-      - name: Execute python via relative path
-        shell: bash
-        run: |
-          set -eux
-          PYDIR="$(dirname "$(readlink -f "$(which python)")")"
-          "$PYDIR/python" -VV
+        if [[ "$PY" == $RUNNER_TOOL_CACHE/* ]]; then
+          echo "Using toolcache"
+        else
+          echo "Downloaded outside toolcache"
+        fi
 
-      # ------------------------------------------------------------
-      # Exec-path proof (coverage-style re-exec)
-      # ------------------------------------------------------------
-      - name: Execv test (same exec path as coverage.py)
-        shell: bash
-        run: |
-          set -eux
+    # ------------------------------------------------------------
+    # ELF inspection
+    # ------------------------------------------------------------
+    - name: ELF inspection
+      run: |
+        set -eux
+        PY=$(readlink -f "$(which python)")
+        file "$PY"
+        readelf -d "$PY" | grep -E 'RPATH|RUNPATH' || echo "None"
+        ldd "$PY" || true
 
-          cat > exec_test.py <<'EOF'
-          import os, sys
-
-          print("parent python executable:", sys.executable)
-          print("parent argv:", sys.argv)
-
-          # Replace current process with a fresh python exec
-          os.execv(sys.executable, [sys.executable, "-VV"])
-          EOF
-
-          python exec_test.py
-
-      # ------------------------------------------------------------
-      # Controlled experiment: inject LD_LIBRARY_PATH
-      # ------------------------------------------------------------
-      - name: Execute python with LD_LIBRARY_PATH injected
-        shell: bash
-        run: |
-          set -eux
-          PYROOT="$(dirname "$(dirname "$(readlink -f "$(which python)")")")"
-          export LD_LIBRARY_PATH="$PYROOT/lib:${LD_LIBRARY_PATH:-}"
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-          python -VV
-
+    # ------------------------------------------------------------
+    # Python self-report
+    # ------------------------------------------------------------
+    - name: Python self-report
+      run: |
+        python - <<'PY'
+import sys, sysconfig, platform
+print("Executable:", sys.executable)
+print("Prefix:", sys.prefix)
+print("Exec Prefix:", sys.exec_prefix)
+print("Machine:", platform.machine())
+print("LIBDIR:", sysconfig.get_config_var("LIBDIR"))
+print("LDLIBRARY:", sysconfig.get_config_var("LDLIBRARY"))
+PY
