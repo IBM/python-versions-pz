@@ -99,7 +99,7 @@ RUN FAIL_ON_CRITICAL=0 FAIL_ON_HIGH=0 FAIL_ON_MEDIUM=0 FAIL_ON_SECRET=0 \
 WORKDIR /python-versions/tests
 RUN cp $RUNNER_TEMP/work/build_output.txt $RUNNER_TEMP/ || touch $RUNNER_TEMP/build_output.txt
 RUN pwsh -Command "Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck" && \
-    AGENT_TOOLSDIRECTORY=/opt RUNNER_TOOL_CACHE=/opt pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${TARGETARCH}
+    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache RUNNER_TOOL_CACHE=/opt/hostedtoolcache pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${TARGETARCH}
 
 # Sanitize
 RUN find ${PYTHON_INSTALL_DIR} -name "*.pyc" -delete && \
