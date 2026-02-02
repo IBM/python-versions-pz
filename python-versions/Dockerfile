@@ -24,15 +24,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
     CXX=g++ \
     CFLAGS="-O3 -fPIC -fstack-protector-strong -Wformat -Werror=format-security -g1" \
     CXXFLAGS="-O3 -fPIC -fstack-protector-strong -Wformat -Werror=format-security -g1" \
-    LDFLAGS="-Wl,-z,relro -Wl,-z,now" \
-    PYTHON_INSTALL_DIR=/opt/Python/${PYTHON_VERSION}/${TARGETARCH}
+    LDFLAGS="-Wl,-z,relro -Wl,-z,now -Wl,--rpath=\$ORIGIN/../lib" \
+    PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
 
 ENV pythonLocation=${PYTHON_INSTALL_DIR} \
     PKG_CONFIG_PATH=${PYTHON_INSTALL_DIR}/lib/pkgconfig \
     LD_LIBRARY_PATH=${PYTHON_INSTALL_DIR}/lib \
     PATH=${PYTHON_INSTALL_DIR}/bin:$PATH \
     RUNNER_TEMP=/tmp \
-    RUNNER_TOOL_CACHE=/opt
+    RUNNER_TOOL_CACHE=/opt/hostedtoolcache
 
 # Install Dependencies
 RUN apt-get -qq update -y && \
@@ -99,7 +99,7 @@ RUN FAIL_ON_CRITICAL=0 FAIL_ON_HIGH=0 FAIL_ON_MEDIUM=0 FAIL_ON_SECRET=0 \
 WORKDIR /python-versions/tests
 RUN cp $RUNNER_TEMP/work/build_output.txt $RUNNER_TEMP/ || touch $RUNNER_TEMP/build_output.txt
 RUN pwsh -Command "Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck" && \
-    AGENT_TOOLSDIRECTORY=/opt RUNNER_TOOL_CACHE=/opt pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${TARGETARCH}
+    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache RUNNER_TOOL_CACHE=/opt/hostedtoolcache pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${TARGETARCH}
 
 # Sanitize
 RUN find ${PYTHON_INSTALL_DIR} -name "*.pyc" -delete && \
@@ -120,7 +120,7 @@ RUN apt-get update && \
     ca-certificates openssl libssl3 libffi8 libsqlite3-0 liblzma5 libbz2-1.0 zlib1g && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /opt/Python/${PYTHON_VERSION}/${TARGETARCH} /opt/Python/${PYTHON_VERSION}/${TARGETARCH}
+COPY --from=builder /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH} /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
 # Copy Artifacts & Logs
 COPY --from=builder /tmp/artifact /tmp/artifact
 # NOTE: The builder stage emits artifacts under /tmp/artifact using names such as
@@ -133,7 +133,7 @@ COPY --from=builder /tmp/artifact/python-${PYTHON_VERSION}-${TARGETARCH}.sbom.js
 
 RUN rm -f /opt/Python/${PYTHON_VERSION}/${TARGETARCH}/Python-${PYTHON_VERSION}.tgz
 
-ENV PYTHON_INSTALL_DIR=/opt/Python/${PYTHON_VERSION}/${TARGETARCH}
+ENV PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
 ENV PATH=${PYTHON_INSTALL_DIR}/bin:$PATH
 ENV LD_LIBRARY_PATH=${PYTHON_INSTALL_DIR}/lib
 
