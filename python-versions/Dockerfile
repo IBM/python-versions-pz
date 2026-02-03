@@ -93,7 +93,7 @@ RUN chmod +x /usr/local/bin/trivy-gate.sh
 # We pipe to 'tee' to save stdout to a file AND show it in console.
 # Because SHELL is set to pipefail, if the gate fails, the build will fail.
 RUN FAIL_ON_CRITICAL=0 FAIL_ON_HIGH=0 FAIL_ON_MEDIUM=0 FAIL_ON_SECRET=0 \
-    /usr/local/bin/trivy-gate.sh 2>&1 | tee /tmp/artifact/trivy-gate.log || true
+    /usr/local/bin/trivy-gate.sh /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-vuln.json /tmp/artifact/trivy-gate-result.json /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-secret.json 2>&1 | tee /tmp/artifact/trivy-gate.log || true
 
 # Run Tests
 WORKDIR /python-versions/tests
