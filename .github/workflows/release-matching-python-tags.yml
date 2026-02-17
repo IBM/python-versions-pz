@@ -49,8 +49,8 @@ jobs:
           RELEASE_TYPES="stable"
           
           if [ -f "$filter_file" ]; then
-            # Use Python to parse YAML
-            read VERSION_FILTER RELEASE_TYPES < <(python3 << 'EOF'
+            # Use Python to parse YAML (within poetry environment)
+            read VERSION_FILTER RELEASE_TYPES < <(poetry run python << 'EOF'
           import yaml
           import sys
           
