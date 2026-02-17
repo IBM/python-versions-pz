@@ -197,7 +197,7 @@ class TestFilterVersions:
     def test_filter_versions_stable_only(self, sample_manifest):
         """Test filtering for stable versions only."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(only_stable=True)
+        versions = parser.filter_versions(release_types=['stable'])
         assert "3.13.0" in versions
         assert "3.12.5" in versions
         assert "3.8.10" in versions
@@ -207,25 +207,25 @@ class TestFilterVersions:
     def test_filter_versions_include_rc(self, sample_manifest):
         """Test filtering for RC versions."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(include_rc=True)
+        versions = parser.filter_versions(release_types=['rc'])
         assert "3.11.0-rc.1" in versions
 
     def test_filter_versions_include_beta(self, sample_manifest):
         """Test filtering for beta versions."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(include_beta=True)
+        versions = parser.filter_versions(release_types=['beta'])
         assert "3.10.0-beta.2" in versions
 
     def test_filter_versions_include_alpha(self, sample_manifest):
         """Test filtering for alpha versions."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(include_alpha=True)
+        versions = parser.filter_versions(release_types=['alpha'])
         assert "3.9.0-alpha.1" in versions
 
     def test_filter_versions_with_version_filter(self, sample_manifest):
         """Test filtering by version pattern."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(only_stable=True, version_filter="3.1*")
+        versions = parser.filter_versions(release_types=['stable'], version_filter="3.1*")
         assert "3.13.0" in versions
         # 3.12.5 matches 3.1* pattern (3.1 followed by anything)
         assert "3.12.5" in versions
@@ -241,7 +241,7 @@ class TestFilterVersions:
     def test_filter_versions_prerelease_excludes_stable(self, sample_manifest):
         """Test that prerelease filters exclude stable."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.filter_versions(include_rc=True)
+        versions = parser.filter_versions(release_types=['rc'])
         # Should NOT include stable versions when rc flag is set
         assert "3.11.0-rc.1" in versions
         # Stable versions should be excluded
@@ -254,7 +254,7 @@ class TestListVersions:
     def test_list_versions_default_sorted(self, sample_manifest):
         """Test listing versions in correct order."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.list_versions(only_stable=True)
+        versions = parser.list_versions(release_types=['stable'])
         # Should be sorted descending
         assert versions[0] == "3.13.0"
         assert versions[-1] == "3.8.10"
@@ -262,14 +262,14 @@ class TestListVersions:
     def test_list_versions_with_filter(self, sample_manifest):
         """Test listing with filter."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.list_versions(only_stable=True, version_filter="3.1*")
+        versions = parser.list_versions(release_types=['stable'], version_filter="3.1*")
         assert len(versions) == 2  # 3.13.0 and 3.12.5
         assert versions[0] == "3.13.0"
 
     def test_list_versions_empty_result(self, sample_manifest):
         """Test listing with no matching results."""
         parser = PythonManifestParser(sample_manifest)
-        versions = parser.list_versions(only_stable=True, version_filter="5.0.*")
+        versions = parser.list_versions(release_types=['stable'], version_filter="5.0.*")
         assert len(versions) == 0
 
 
@@ -279,33 +279,33 @@ class TestGetLatestVersion:
     def test_get_latest_version_stable(self, sample_manifest):
         """Test getting latest stable version."""
         parser = PythonManifestParser(sample_manifest)
-        latest = parser.get_latest_version(only_stable=True)
+        latest = parser.get_latest_version(release_types=['stable'])
         assert latest == "3.13.0"
 
     def test_get_latest_version_with_rc(self, sample_manifest):
         """Test getting latest with RC."""
         parser = PythonManifestParser(sample_manifest)
-        latest = parser.get_latest_version(include_rc=True)
-        # When only rc flag is set, includes only rc versions (excludes stable)
-        assert "rc" in latest or latest is None
+        latest = parser.get_latest_version(release_types=['rc'])
+        # When only rc is set, includes only rc versions (excludes stable)
+        assert "rc" in latest
 
     def test_get_latest_version_rc_only(self, sample_manifest):
         """Test getting latest RC only."""
         parser = PythonManifestParser(sample_manifest)
-        latest = parser.get_latest_version(include_rc=True, include_alpha=True, include_beta=True)
-        # When prerelease flags are set, includes only prerelease (not stable)
+        latest = parser.get_latest_version(release_types=['rc', 'alpha', 'beta'])
+        # When prerelease versions are set, includes only prerelease (not stable)
         assert any(tag in latest for tag in ["rc", "alpha", "beta", "rc.1", "alpha.1", "beta.2"])
 
     def test_get_latest_version_no_match(self, sample_manifest):
         """Test latest with no matches."""
         parser = PythonManifestParser(sample_manifest)
-        latest = parser.get_latest_version(version_filter="5.0.*")
+        latest = parser.get_latest_version(release_types=['stable'], version_filter="5.0.*")
         assert latest is None
 
     def test_get_latest_version_with_filter(self, sample_manifest):
         """Test getting latest with version filter."""
         parser = PythonManifestParser(sample_manifest)
-        latest = parser.get_latest_version(only_stable=True, version_filter="3.1*")
+        latest = parser.get_latest_version(release_types=['stable'], version_filter="3.1*")
         assert latest == "3.13.0"
 
 
@@ -329,7 +329,7 @@ class TestVersionSortingOrder:
             {"version": "3.10.1"},
         ]
         parser = PythonManifestParser(manifest)
-        versions = parser.list_versions()
+        versions = parser.list_versions(release_types=['stable'])
         assert versions[0] == "3.10.10"
         assert versions[-1] == "3.10.1"
 
@@ -342,7 +342,7 @@ class TestVersionSortingOrder:
             {"version": "3.10.0-rc.10"},
         ]
         parser = PythonManifestParser(manifest)
-        versions = parser.list_versions(only_stable=False, include_rc=True)
+        versions = parser.list_versions(release_types=['rc'])
         # RC versions should be sorted by number (descending)
         # Due to negative pre_num in parsing, the sorting might be different
         if len(versions) > 0:
