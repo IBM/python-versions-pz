@@ -21,4 +21,4 @@
 
 # Current configuration:
 version: 3.15.*
-release_types: [stable, alpha, beta]
+release_types: [alpha, beta]
