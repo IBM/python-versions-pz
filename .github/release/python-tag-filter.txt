@@ -1,5 +1,24 @@
-# Optional: set a version filter for release-matching-python-tags workflow
-# Examples:
-# 3.13.*
-# 3.12.*
-3.14.*
+# Release filter configuration for release-matching-python-tags workflow
+# Format: YAML with version and release_types
+
+# Example 1: Only stable releases of 3.14
+# version: 3.14.*
+# release_types: [stable]
+
+# Example 2: Multiple versions with different release types
+# - version: 3.14.*
+#   release_types: [stable, beta]
+# - version: 3.13.*
+#   release_types: [stable]
+
+# Example 3: All release types (using YAML array syntax)
+# version: 3.14.*
+# release_types:
+#   - stable
+#   - beta
+#   - rc
+#   - alpha
+
+# Current configuration:
+version: 3.15.*
+release_types: [alpha, beta]
