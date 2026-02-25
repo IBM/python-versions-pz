@@ -1,0 +1,23 @@
+[
+  {
+    "version": "3.15.0-alpha.1",
+    "stable": true,
+    "release_url": "",
+    "files": [
+      {
+        "filename": "python-3.15.0-alpha.1-linux-22.04-s390x.tar.gz",
+        "arch": "22.04",
+        "platform": "alpha.1",
+        "platform_version": "linux",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.15.0-alpha.1/python-3.15.0-alpha.1-linux-22.04-s390x.tar.gz"
+      },
+      {
+        "filename": "python-3.15.0-alpha.1-linux-22.04-ppc64le.tar.gz",
+        "arch": "22.04",
+        "platform": "alpha.1",
+        "platform_version": "linux",
+        "download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.15.0-alpha.1/python-3.15.0-alpha.1-linux-22.04-ppc64le.tar.gz"
+      }
+    ]
+  }
+]
