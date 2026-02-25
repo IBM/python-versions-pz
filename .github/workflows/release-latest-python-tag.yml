@@ -49,7 +49,7 @@ jobs:
           fi
   
 
-          latest_tag=$(poetry run python .github/scripts/get_python_version.py --latest --stable)
+          latest_tag=$(poetry run python .github/scripts/get_python_version.py --latest)
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
 
   build-and-release-matrix:
