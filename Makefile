@@ -32,11 +32,29 @@ FAIL_ON_SECRET          ?= 0
 # System Architecture Normalization
 ARCH_RAW := $(shell uname -m)
 ifeq ($(ARCH_RAW),x86_64)
-  ARCH := amd64
+	ARCH_DEFAULT := amd64
 else ifeq ($(ARCH_RAW),aarch64)
-  ARCH := arm64
+	ARCH_DEFAULT := arm64
 else
-  ARCH := $(ARCH_RAW)
+	ARCH_DEFAULT := $(ARCH_RAW)
+endif
+
+# Build architecture and variant settings
+ARCH ?= $(ARCH_DEFAULT)
+FREE_THREADED ?= 0
+
+# ARCH may be passed as <arch>-freethreaded for backwards compatibility
+ifneq ($(filter %-freethreaded,$(ARCH)),)
+	BASE_ARCH := $(patsubst %-freethreaded,%,$(ARCH))
+	PYTHON_ARCH := $(ARCH)
+	FREE_THREADED := 1
+else
+	BASE_ARCH := $(ARCH)
+	ifeq ($(FREE_THREADED),1)
+		PYTHON_ARCH := $(ARCH)-freethreaded
+	else
+		PYTHON_ARCH := $(ARCH)
+	endif
 endif
 
 # Container Engine Detection
@@ -52,22 +70,22 @@ BASE_IMAGE := powershell:ubuntu-$(UBUNTU_VERSION)
 
 # Naming conventions
 OUTPUT_DIR := python-versions/output
-IMAGE_NAME := python:$(PYTHON_VERSION)-ubuntu-$(UBUNTU_VERSION)-$(ARCH)
-TEMP_CONTAINER_NAME := python-build-$(PYTHON_VERSION)-$(ARCH)-tmp
+IMAGE_NAME := python:$(PYTHON_VERSION)-ubuntu-$(UBUNTU_VERSION)-$(PYTHON_ARCH)
+TEMP_CONTAINER_NAME := python-build-$(PYTHON_VERSION)-$(PYTHON_ARCH)-tmp
 
 # [CHANGED] Separate Internal vs Host filenames
 # 1. The name generated INSIDE the container (must match build-python.ps1 output)
-INTERNAL_ARTIFACT_NAME := python-$(PYTHON_VERSION)-linux-$(ARCH).tar.gz
+INTERNAL_ARTIFACT_NAME := python-$(PYTHON_VERSION)-linux-$(PYTHON_ARCH).tar.gz
 
 # 2. The name we save ON THE HOST (includes Ubuntu version for GitHub Workflow)
-HOST_ARTIFACT_NAME := python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(ARCH).tar.gz
+HOST_ARTIFACT_NAME := python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(PYTHON_ARCH).tar.gz
 
 # Prerequisite Files
 PS_DIR := PowerShell
 PS_PREREQS := \
     $(PS_DIR)/Dockerfile \
     $(PS_DIR)/patch/powershell-native-$(POWERSHELL_NATIVE_VERSION).patch \
-    $(PS_DIR)/patch/powershell-$(ARCH)-$(POWERSHELL_VERSION).patch \
+	$(PS_DIR)/patch/powershell-$(BASE_ARCH)-$(POWERSHELL_VERSION).patch \
     $(PS_DIR)/patch/powershell-gen-$(POWERSHELL_VERSION).tar.gz
 
 # --- Targets ------------------------------------------------------------------
@@ -79,14 +97,15 @@ all: $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME) verify-gate
 
 # 1. Build the Python Artifact
 $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): powershell | $(OUTPUT_DIR)
-	@echo "--- Building Python $(PYTHON_VERSION) Image ($(ARCH)) ---"
+	@echo "--- Building Python $(PYTHON_VERSION) Image ($(PYTHON_ARCH)) ---"
 	@echo "    Security Gate: CRIT=$(FAIL_ON_CRITICAL) HIGH=$(FAIL_ON_HIGH)"
 	$(Q)cd python-versions && $(CONTAINER_ENGINE) build \
 		--network=host \
 		--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
 		--build-arg ACTIONS_PYTHON_VERSIONS=$(ACTIONS_PYTHON_VERSIONS) \
 		--build-arg UBUNTU_VERSION=$(UBUNTU_VERSION) \
-		--build-arg TARGETARCH=$(ARCH) \
+		--build-arg TARGETARCH=$(BASE_ARCH) \
+		--build-arg PYTHON_ARCH=$(PYTHON_ARCH) \
 		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		--build-arg TRIVY_VERSION=$(TRIVY_VERSION) \
 		--build-arg FAIL_ON_CRITICAL=$(FAIL_ON_CRITICAL) \
@@ -105,14 +124,14 @@ $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): powershell | $(OUTPUT_DIR)
 		$(abspath $(OUTPUT_DIR))/$(HOST_ARTIFACT_NAME)
 	
 	@# Copy Security Reports
-	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/python-$(PYTHON_VERSION)-$(ARCH).sbom.json \
-		$(abspath $(OUTPUT_DIR))/python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(ARCH).sbom.json || echo "Warning: SBOM missing"
+	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/python-$(PYTHON_VERSION)-$(PYTHON_ARCH).sbom.json \
+		$(abspath $(OUTPUT_DIR))/python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(PYTHON_ARCH).sbom.json || echo "Warning: SBOM missing"
 	
-	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/trivy-$(PYTHON_VERSION)-$(ARCH)-vuln.json \
-		$(abspath $(OUTPUT_DIR))/trivy-python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(ARCH)-vuln.json || echo "Warning: Trivy Vuln report missing"
+	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/trivy-$(PYTHON_VERSION)-$(PYTHON_ARCH)-vuln.json \
+		$(abspath $(OUTPUT_DIR))/trivy-python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(PYTHON_ARCH)-vuln.json || echo "Warning: Trivy Vuln report missing"
 	
-	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/trivy-$(PYTHON_VERSION)-$(ARCH)-secret.json \
-		$(abspath $(OUTPUT_DIR))/trivy-python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(ARCH)-secret.json || echo "Warning: Trivy Secret report missing"
+	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/trivy-$(PYTHON_VERSION)-$(PYTHON_ARCH)-secret.json \
+		$(abspath $(OUTPUT_DIR))/trivy-python-$(PYTHON_VERSION)-linux-$(UBUNTU_VERSION)-$(PYTHON_ARCH)-secret.json || echo "Warning: Trivy Secret report missing"
 	
 	$(Q)$(CONTAINER_ENGINE) cp $(TEMP_CONTAINER_NAME):/tmp/artifact/trivy-gate-result.json \
 		$(abspath $(OUTPUT_DIR))/trivy-gate-result.json || echo "Warning: Trivy Gate result missing"
@@ -144,7 +163,7 @@ powershell: $(PS_PREREQS)
 		--build-arg POWERSHELL_VERSION=$(POWERSHELL_VERSION) \
 		--build-arg POWERSHELL_NATIVE_VERSION=$(POWERSHELL_NATIVE_VERSION) \
 		--build-arg UBUNTU_VERSION=$(UBUNTU_VERSION) \
-		--build-arg TARGETARCH=$(ARCH) \
+		--build-arg TARGETARCH=$(BASE_ARCH) \
 		--tag powershell:ubuntu-$(UBUNTU_VERSION) .
 
 $(OUTPUT_DIR):
@@ -162,4 +181,5 @@ clean:
 help:
 	@echo "Usage: make [target] [VARIABLES]"
 	@echo "Targets: all, powershell, clean, help"
+	@echo "Variables: PYTHON_VERSION, ARCH, FREE_THREADED (0|1), UBUNTU_VERSION"
 	@echo "Output: $(HOST_ARTIFACT_NAME)"

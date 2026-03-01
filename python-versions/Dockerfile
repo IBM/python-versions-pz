@@ -2,6 +2,7 @@
 ARG UBUNTU_VERSION=24.04
 ARG BASE_IMAGE=powershell:ubuntu-${UBUNTU_VERSION}
 ARG TARGETARCH
+ARG PYTHON_ARCH
 ARG PYTHON_VERSION=3.13.3
 ARG ACTIONS_PYTHON_VERSIONS=3.13.3-14344076652
 ARG TRIVY_VERSION=v0.68.1
@@ -11,6 +12,7 @@ FROM ${BASE_IMAGE} AS builder
 
 ARG UBUNTU_VERSION
 ARG TARGETARCH
+ARG PYTHON_ARCH
 ARG PYTHON_VERSION
 ARG ACTIONS_PYTHON_VERSIONS
 ARG TRIVY_VERSION
@@ -25,7 +27,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     CFLAGS="-O3 -fPIC -fstack-protector-strong -Wformat -Werror=format-security -g1" \
     CXXFLAGS="-O3 -fPIC -fstack-protector-strong -Wformat -Werror=format-security -g1" \
     LDFLAGS="-Wl,-z,relro -Wl,-z,now" \
-    PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
+    PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${PYTHON_ARCH}
 
 ENV pythonLocation=${PYTHON_INSTALL_DIR} \
     PKG_CONFIG_PATH=${PYTHON_INSTALL_DIR}/lib/pkgconfig \
@@ -60,7 +62,7 @@ RUN trivy fs --scanners secret,misconfig --exit-code 1 ./
 
 # Build & Restore Logic
 RUN export MAKEFLAGS="-j $(nproc)" && \
-    pwsh ./builders/build-python.ps1 ${PYTHON_VERSION} linux ${TARGETARCH} && \
+    pwsh ./builders/build-python.ps1 ${PYTHON_VERSION} linux ${PYTHON_ARCH} && \
     echo "Build complete. Extracting artifact..." && \
     mkdir -p /tmp/recover && \
     tar -xzf /tmp/artifact/*.tar.gz -C /tmp/recover && \
@@ -73,17 +75,27 @@ RUN export MAKEFLAGS="-j $(nproc)" && \
       mv /tmp/recover/* "${PYTHON_INSTALL_DIR}/"; \
     fi && \
     rm -rf /tmp/recover && \
-    if [ ! -e ${PYTHON_INSTALL_DIR}/bin/python ]; then ln -sf ${PYTHON_INSTALL_DIR}/bin/python3 ${PYTHON_INSTALL_DIR}/bin/python; fi && \
-    if [ -x ${PYTHON_INSTALL_DIR}/bin/pip3 ] && [ ! -e ${PYTHON_INSTALL_DIR}/bin/pip ]; then ln -sf ${PYTHON_INSTALL_DIR}/bin/pip3 ${PYTHON_INSTALL_DIR}/bin/pip; fi && \
+        if [ ! -e ${PYTHON_INSTALL_DIR}/bin/python ]; then \
+            ln -sf ${PYTHON_INSTALL_DIR}/bin/python3 ${PYTHON_INSTALL_DIR}/bin/python; \
+        fi && \
+        if [ -x ${PYTHON_INSTALL_DIR}/bin/pip3 ] && [ ! -e ${PYTHON_INSTALL_DIR}/bin/pip ]; then \
+            ln -sf ${PYTHON_INSTALL_DIR}/bin/pip3 ${PYTHON_INSTALL_DIR}/bin/pip; \
+        fi && \
     ${PYTHON_INSTALL_DIR}/bin/python3 -c "import ssl; print('Python installed and SSL verified')"
 
 # [CEVS STEP 2] Post-build Scan & Gate
 RUN mkdir -p /tmp/artifact && \
-    trivy fs --format cyclonedx --output /tmp/artifact/python-${PYTHON_VERSION}-${TARGETARCH}.sbom.json ${PYTHON_INSTALL_DIR} || true
+        trivy fs --format cyclonedx \
+            --output /tmp/artifact/python-${PYTHON_VERSION}-${PYTHON_ARCH}.sbom.json \
+            ${PYTHON_INSTALL_DIR} || true
 
 RUN trivy --download-db-only || true; \
-    trivy fs --format json --output /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-vuln.json --scanners vuln ${PYTHON_INSTALL_DIR} || true && \
-    trivy fs --format json --output /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-secret.json --scanners secret,misconfig ${PYTHON_INSTALL_DIR} || true
+        trivy fs --format json \
+            --output /tmp/artifact/trivy-${PYTHON_VERSION}-${PYTHON_ARCH}-vuln.json \
+            --scanners vuln ${PYTHON_INSTALL_DIR} || true && \
+        trivy fs --format json \
+            --output /tmp/artifact/trivy-${PYTHON_VERSION}-${PYTHON_ARCH}-secret.json \
+            --scanners secret,misconfig ${PYTHON_INSTALL_DIR} || true
 
 # Copy Enhanced Gate Script with Logging
 COPY trivy-gate.sh /usr/local/bin/trivy-gate.sh
@@ -93,13 +105,19 @@ RUN chmod +x /usr/local/bin/trivy-gate.sh
 # We pipe to 'tee' to save stdout to a file AND show it in console.
 # Because SHELL is set to pipefail, if the gate fails, the build will fail.
 RUN FAIL_ON_CRITICAL=0 FAIL_ON_HIGH=0 FAIL_ON_MEDIUM=0 FAIL_ON_SECRET=0 \
-    /usr/local/bin/trivy-gate.sh /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-vuln.json /tmp/artifact/trivy-gate-result.json /tmp/artifact/trivy-${PYTHON_VERSION}-${TARGETARCH}-secret.json 2>&1 | tee /tmp/artifact/trivy-gate.log || true
+        /usr/local/bin/trivy-gate.sh \
+            /tmp/artifact/trivy-${PYTHON_VERSION}-${PYTHON_ARCH}-vuln.json \
+            /tmp/artifact/trivy-gate-result.json \
+            /tmp/artifact/trivy-${PYTHON_VERSION}-${PYTHON_ARCH}-secret.json \
+            2>&1 | tee /tmp/artifact/trivy-gate.log || true
 
 # Run Tests
 WORKDIR /python-versions/tests
 RUN cp $RUNNER_TEMP/work/build_output.txt $RUNNER_TEMP/ || touch $RUNNER_TEMP/build_output.txt
 RUN pwsh -Command "Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck" && \
-    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache RUNNER_TOOL_CACHE=/opt/hostedtoolcache pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${TARGETARCH}
+    AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache \
+    RUNNER_TOOL_CACHE=/opt/hostedtoolcache \
+    pwsh python-tests.ps1 ${PYTHON_VERSION} linux ${PYTHON_ARCH}
 
 # Sanitize
 RUN find ${PYTHON_INSTALL_DIR} -name "*.pyc" -delete && \
@@ -111,16 +129,16 @@ FROM ubuntu:${UBUNTU_VERSION} AS final
 
 ARG PYTHON_VERSION
 ARG TARGETARCH
+ARG PYTHON_ARCH
 
 RUN groupadd -g 10001 python_group && \
-    useradd -u 10001 -g python_group -s /bin/bash -m python_user
-
-RUN apt-get update && \
+    useradd -u 10001 -g python_group -s /bin/bash -m python_user && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates openssl libssl3 libffi8 libsqlite3-0 liblzma5 libbz2-1.0 zlib1g && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH} /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
+COPY --from=builder /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${PYTHON_ARCH} /opt/hostedtoolcache/Python/${PYTHON_VERSION}/${PYTHON_ARCH}
 # Copy Artifacts & Logs
 COPY --from=builder /tmp/artifact /tmp/artifact
 # NOTE: The builder stage emits artifacts under /tmp/artifact using names such as
@@ -129,11 +147,11 @@ COPY --from=builder /tmp/artifact /tmp/artifact
 # naming here; the `Makefile` handles the renaming when copying artifacts out
 # of the container to the final output path, including adding `linux-<UBUNTU_VERSION>`
 # when invoked from CI workflows (see .github/workflows/reusable-build-and-release-python-versions.yml).
-COPY --from=builder /tmp/artifact/python-${PYTHON_VERSION}-${TARGETARCH}.sbom.json /opt/python-sbom.json
+COPY --from=builder /tmp/artifact/python-${PYTHON_VERSION}-${PYTHON_ARCH}.sbom.json /opt/python-sbom.json
 
-RUN rm -f /opt/Python/${PYTHON_VERSION}/${TARGETARCH}/Python-${PYTHON_VERSION}.tgz
+RUN rm -f /opt/Python/${PYTHON_VERSION}/${PYTHON_ARCH}/Python-${PYTHON_VERSION}.tgz
 
-ENV PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${TARGETARCH}
+ENV PYTHON_INSTALL_DIR=/opt/hostedtoolcache/Python/${PYTHON_VERSION}/${PYTHON_ARCH}
 ENV PATH=${PYTHON_INSTALL_DIR}/bin:$PATH
 ENV LD_LIBRARY_PATH=${PYTHON_INSTALL_DIR}/lib
 
