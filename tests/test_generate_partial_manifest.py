@@ -67,6 +67,17 @@ def test_parse_filename_valid_asset():
     }
 
 
+def test_parse_filename_valid_freethreaded_asset():
+    name = "python-3.14.0-linux-24.04-ppc64le-freethreaded.tar.gz"
+    parsed = gpm.parse_filename(name)
+    assert parsed == {
+        "version": "3.14.0",
+        "platform": "linux",
+        "platform_version": "24.04",
+        "arch": "ppc64le-freethreaded",
+    }
+
+
 def test_parse_filename_invalid_asset():
     assert gpm.parse_filename("python-3.13.3-linux.tar.gz") is None
 
@@ -92,6 +103,20 @@ def test_build_manifest_entries_filters_assets():
     assert entries[0]["filename"].endswith("tar.gz")
     assert entries[0]["arch"] == "ppc64le"
     assert len(errors) == 0  # Valid URLs should have no errors
+
+
+def test_build_manifest_entries_keeps_freethreaded_arch_suffix():
+    assets = [
+        {
+            "name": "python-3.14.0-linux-24.04-ppc64le-freethreaded.tar.gz",
+            "browser_download_url": "https://github.com/IBM/python-versions-pz/releases/download/3.14.0/python-3.14.0-linux-24.04-ppc64le-freethreaded.tar.gz",
+        }
+    ]
+
+    entries, errors = gpm.build_manifest_entries("3.14.0", assets, "IBM", "python-versions-pz")
+    assert len(entries) == 1
+    assert entries[0]["arch"] == "ppc64le-freethreaded"
+    assert len(errors) == 0
 
 
 def test_build_manifest_entries_invalid_urls():
