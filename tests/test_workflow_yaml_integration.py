@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import os
 import json
+import sys
 from pathlib import Path
 
 
@@ -25,7 +26,7 @@ release_types: [stable, beta]
             # Simulate the Python snippet from the workflow
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     version = config.get('version', '')
     release_types = config.get('release_types', ['stable'])
@@ -35,7 +36,7 @@ with open('{temp_file}', 'r') as f:
     print("RELEASE_TYPES=" + ' '.join(release_types))
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -62,7 +63,7 @@ release_types:
         try:
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     version = config.get('version', '')
     release_types = config.get('release_types', ['stable'])
@@ -72,7 +73,7 @@ with open('{temp_file}', 'r') as f:
     print("RELEASE_TYPES=" + ' '.join(release_types))
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -93,7 +94,7 @@ with open('{temp_file}', 'r') as f:
         try:
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     if config is None:
         version = ''
@@ -107,7 +108,7 @@ with open('{temp_file}', 'r') as f:
     print("RELEASE_TYPES=" + ' '.join(release_types))
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -133,7 +134,7 @@ release_types: [stable]  # Inline comment
         try:
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     version = config.get('version', '')
     release_types = config.get('release_types', ['stable'])
@@ -143,7 +144,7 @@ with open('{temp_file}', 'r') as f:
     print("RELEASE_TYPES=" + ' '.join(release_types))
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -152,6 +153,83 @@ with open('{temp_file}', 'r') as f:
             output = result.stdout.strip()
             assert 'VERSION_FILTER=3.14.*' in output
             assert 'RELEASE_TYPES=stable' in output
+        finally:
+            os.unlink(temp_file)
+
+    def test_yaml_parsing_with_variants(self):
+        """Test parsing variants from YAML config."""
+        yaml_content = """version: 3.14.*
+release_types: [stable]
+variants: [default, freethreaded]
+"""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write(yaml_content)
+            temp_file = f.name
+
+        try:
+            python_code = f"""
+import json
+import yaml
+with open(r'''{temp_file}''', 'r') as f:
+    config = yaml.safe_load(f) or {{}}
+variants = config.get('variants', ['default'])
+if isinstance(variants, str):
+    variants = [variants]
+normalized = []
+for v in variants:
+    value = str(v).strip().lower()
+    if value in ('default', 'freethreaded') and value not in normalized:
+        normalized.append(value)
+if not normalized:
+    normalized = ['default']
+print('VARIANTS=' + json.dumps(normalized))
+"""
+            result = subprocess.run(
+                [sys.executable, '-c', python_code],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            output = result.stdout.strip()
+            assert 'VARIANTS=["default", "freethreaded"]' in output
+        finally:
+            os.unlink(temp_file)
+
+    def test_yaml_parsing_with_free_threaded_fallback(self):
+        """Test legacy free_threaded boolean fallback to variants."""
+        yaml_content = """version: 3.14.*
+release_types: [stable]
+free_threaded: true
+"""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+            f.write(yaml_content)
+            temp_file = f.name
+
+        try:
+            python_code = f"""
+import json
+import yaml
+with open(r'''{temp_file}''', 'r') as f:
+    config = yaml.safe_load(f) or {{}}
+variants = config.get('variants')
+if variants is None:
+    free_threaded = config.get('free_threaded')
+    if isinstance(free_threaded, bool):
+        variants = ['default', 'freethreaded'] if free_threaded else ['default']
+    else:
+        variants = ['default']
+print('VARIANTS=' + json.dumps(variants))
+"""
+            result = subprocess.run(
+                [sys.executable, '-c', python_code],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            output = result.stdout.strip()
+            assert 'VARIANTS=["default", "freethreaded"]' in output
         finally:
             os.unlink(temp_file)
 
@@ -172,7 +250,7 @@ if isinstance(release_types, str):
 print(' '.join(release_types))
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -192,7 +270,7 @@ filter_pattern = '.'.join(latest.split('.')[:2]) + '.*'
 print(filter_pattern)
 """
         result = subprocess.run(
-            ['python3', '-c', python_code],
+            [sys.executable, '-c', python_code],
             capture_output=True,
             text=True,
             timeout=5
@@ -215,7 +293,7 @@ args = parser.parse_args(['--release-types', 'stable', 'beta', 'rc'])
 print(' '.join(args.release_types))
 """
         result = subprocess.run(
-            ['python3', '-c', python_code],
+            [sys.executable, '-c', python_code],
             capture_output=True,
             text=True,
             timeout=5
@@ -234,7 +312,7 @@ args = parser.parse_args([])
 print(' '.join(args.release_types))
 """
         result = subprocess.run(
-            ['python3', '-c', python_code],
+            [sys.executable, '-c', python_code],
             capture_output=True,
             text=True,
             timeout=5
@@ -253,7 +331,7 @@ args = parser.parse_args(['--release-types', 'alpha'])
 print(' '.join(args.release_types))
 """
         result = subprocess.run(
-            ['python3', '-c', python_code],
+            [sys.executable, '-c', python_code],
             capture_output=True,
             text=True,
             timeout=5
@@ -278,14 +356,14 @@ release_types: ["stable", "beta"]
         try:
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     assert config['version'] == '3.14.*'
     assert config['release_types'] == ['stable', 'beta']
     print('OK')
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -307,7 +385,7 @@ release_types:   [ stable ,  beta  ]
         try:
             python_code = f"""
 import yaml
-with open('{temp_file}', 'r') as f:
+with open(r'''{temp_file}''', 'r') as f:
     config = yaml.safe_load(f)
     # YAML parser handles whitespace
     assert config['version'] == '3.14.*'
@@ -315,7 +393,7 @@ with open('{temp_file}', 'r') as f:
     print('OK')
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -339,14 +417,14 @@ release_types: [stable
             python_code = f"""
 import yaml
 try:
-    with open('{temp_file}', 'r') as f:
+    with open(r'''{temp_file}''', 'r') as f:
         config = yaml.safe_load(f)
     print('PARSED')
 except yaml.YAMLError as e:
     print('YAML_ERROR')
 """
             result = subprocess.run(
-                ['python3', '-c', python_code],
+                [sys.executable, '-c', python_code],
                 capture_output=True,
                 text=True,
                 timeout=5
