@@ -9,6 +9,10 @@ on:
       arch:
         required: true
         type: string
+      variant:
+        required: false
+        type: string
+        default: default
       tag:
         required: true
         type: string
@@ -44,9 +48,31 @@ jobs:
             sudo service docker start || true
           fi
 
+      - name: Resolve Python arch variant
+        id: variant
+        run: |
+          case "${{ inputs.variant }}" in
+            default)
+              echo "python_arch=${{ inputs.arch }}" >> "$GITHUB_OUTPUT"
+              echo "free_threaded=0" >> "$GITHUB_OUTPUT"
+              ;;
+            freethreaded)
+              echo "python_arch=${{ inputs.arch }}-freethreaded" >> "$GITHUB_OUTPUT"
+              echo "free_threaded=1" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported variant: ${{ inputs.variant }}"
+              exit 1
+              ;;
+          esac
+
       - name: Build Python artifact using Makefile
         run: |
-          make CONTAINER_ENGINE="sudo docker" PYTHON_VERSION=${{ inputs.tag }} ARCH=${{ inputs.arch }} UBUNTU_VERSION=${{ inputs.platform-version }}
+          make CONTAINER_ENGINE="sudo docker" \
+            PYTHON_VERSION=${{ inputs.tag }} \
+            ARCH=${{ inputs.arch }} \
+            FREE_THREADED=${{ steps.variant.outputs.free_threaded }} \
+            UBUNTU_VERSION=${{ inputs.platform-version }}
 
 
       - name: List output files
@@ -55,11 +81,11 @@ jobs:
       - name: "Upload artifacts: tar & security reports"
         uses: actions/upload-artifact@v4
         with:
-          name: python-tar-${{ inputs.tag }}-${{ inputs.arch }}-${{ inputs.platform-version }}
+          name: python-tar-${{ inputs.tag }}-${{ steps.variant.outputs.python_arch }}-${{ inputs.platform-version }}
           path: |
-            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.tar.gz
-            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}-vuln.json
-            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}-secret.json
-            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ inputs.arch }}.sbom.json
+            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ steps.variant.outputs.python_arch }}.tar.gz
+            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ steps.variant.outputs.python_arch }}-vuln.json
+            python-versions/output/trivy-python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ steps.variant.outputs.python_arch }}-secret.json
+            python-versions/output/python-${{ inputs.tag }}-linux-${{ inputs.platform-version }}-${{ steps.variant.outputs.python_arch }}.sbom.json
             python-versions/output/trivy-gate-result.json
             python-versions/output/trivy-gate.log

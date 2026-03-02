@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       latest_tag: ${{ steps.get_tag.outputs.latest_tag }}
+      build_matrix_json: ${{ steps.get_tag.outputs.build_matrix_json }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,19 +53,76 @@ jobs:
           latest_tag=$(poetry run python .github/scripts/get_python_version.py --latest)
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
 
+          VARIANTS_JSON='["default"]'
+          filter_file=".github/release/python-tag-filter.txt"
+          if [ -f "$filter_file" ]; then
+            VARIANTS_JSON=$(poetry run python << 'EOF'
+          import json
+          import yaml
+
+          with open('.github/release/python-tag-filter.txt', 'r') as f:
+              config = yaml.safe_load(f) or {}
+
+          variants = config.get('variants')
+          if variants is None:
+              free_threaded = config.get('free_threaded')
+              if isinstance(free_threaded, bool):
+                  variants = ['default', 'freethreaded'] if free_threaded else ['default']
+              else:
+                  variants = ['default']
+
+          if isinstance(variants, str):
+              variants = [variants]
+
+          normalized = []
+          for value in variants:
+              item = str(value).strip().lower()
+              if item in ('default', 'freethreaded') and item not in normalized:
+                  normalized.append(item)
+
+          if not normalized:
+              normalized = ['default']
+
+          print(json.dumps(normalized))
+          EOF
+            )
+          fi
+
+          ARCHES_JSON='["ppc64le", "s390x"]'
+          PLATFORMS_JSON='["24.04", "22.04"]'
+          BUILD_MATRIX_JSON=$(jq -cn \
+            --arg latest_tag "$latest_tag" \
+            --argjson arches "$ARCHES_JSON" \
+            --argjson platforms "$PLATFORMS_JSON" \
+            --argjson variants "$VARIANTS_JSON" '
+              [
+                $platforms[] as $platform_version
+                | $arches[] as $arch
+                | $variants[] as $variant
+                | {
+                    tag: $latest_tag,
+                    "platform-version": $platform_version,
+                    arch: $arch,
+                    variant: $variant,
+                    runner_label: ("ubuntu-" + $platform_version + "-" + $arch)
+                  }
+              ]
+            ')
+          echo "build_matrix_json=$BUILD_MATRIX_JSON" >> "$GITHUB_OUTPUT"
+
   build-and-release-matrix:
     needs: get-latest-tag
     strategy:
       fail-fast: false # Allow other legs to proceed even if one fails
       matrix:
-        arch: ['ppc64le', 's390x']
-        platform-version: ['24.04', '22.04']
+        include: ${{ fromJson(needs.get-latest-tag.outputs.build_matrix_json) }}
     uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
     with:
       arch: ${{ matrix.arch }}
-      tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
-      platform-version: ${{ matrix.platform-version }}
-      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'], matrix.arch) }}
+      tag: ${{ matrix.tag }}
+      platform-version: ${{ matrix['platform-version'] }}
+      variant: ${{ matrix.variant }}
+      runner-label: ${{ matrix.runner_label }}
 
   release-asset:
     needs: [build-and-release-matrix, get-latest-tag]
