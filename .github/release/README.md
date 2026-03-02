@@ -14,6 +14,12 @@ The file uses YAML format with the following fields:
   - `beta` - Beta releases (e.g., 3.14.0b1)
   - `rc` - Release candidates (e.g., 3.14.0rc1)
   - `alpha` - Alpha releases (e.g., 3.14.0a1)
+- **variants**: Build variants to include. Valid values:
+  - `default` - Standard Python build
+  - `freethreaded` - Free-threaded Python build (`-freethreaded` artifact suffix)
+
+Legacy compatibility is also supported with:
+- **free_threaded**: Boolean shortcut (`true` maps to `variants: [default, freethreaded]`)
 
 ### Examples
 
@@ -21,6 +27,7 @@ The file uses YAML format with the following fields:
 ```yaml
 version: 3.14.*
 release_types: [stable]
+variants: [default]
 ```
 
 **Example 2: Both stable and beta (multi-line format)**
@@ -29,12 +36,16 @@ version: 3.13.*
 release_types:
   - stable
   - beta
+variants:
+  - default
+  - freethreaded
 ```
 
 **Example 3: All release types**
 ```yaml
 version: 3.12.*
 release_types: [stable, beta, rc, alpha]
+variants: [default, freethreaded]
 ```
 
 ### Behavior
