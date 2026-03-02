@@ -21,7 +21,7 @@ ACTIONS_PYTHON_VERSIONS ?= 3.13.3-14344076652
 POWERSHELL_VERSION      ?= v7.5.2
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
-TRIVY_VERSION           ?= v0.68.2
+TRIVY_VERSION           ?= v0.69.2
 
 # Security Gates (0 = Log Only, 1 = Fail Build)
 FAIL_ON_CRITICAL        ?= 1
@@ -90,13 +90,13 @@ PS_PREREQS := \
 
 # --- Targets ------------------------------------------------------------------
 
-.PHONY: all powershell clean help verify-gate
+.PHONY: all powershell clean help verify-gate verify-trivy-version
 
 # Updated 'all' to target the new host artifact name
 all: $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME) verify-gate
 
 # 1. Build the Python Artifact
-$(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): powershell | $(OUTPUT_DIR)
+$(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): verify-trivy-version powershell | $(OUTPUT_DIR)
 	@echo "--- Building Python $(PYTHON_VERSION) Image ($(PYTHON_ARCH)) ---"
 	@echo "    Security Gate: CRIT=$(FAIL_ON_CRITICAL) HIGH=$(FAIL_ON_HIGH)"
 	$(Q)cd python-versions && $(CONTAINER_ENGINE) build \
@@ -155,6 +155,11 @@ verify-gate:
 		echo ""; \
 	fi
 
+verify-trivy-version:
+	@echo "--- Verifying Trivy release $(TRIVY_VERSION) ---"
+	@curl -fsSL "https://api.github.com/repos/aquasecurity/trivy/releases/tags/$(TRIVY_VERSION)" >/dev/null || \
+		(echo "ERROR: Trivy release $(TRIVY_VERSION) not found. Set a valid TRIVY_VERSION (e.g. v0.69.2)." && exit 1)
+
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
@@ -181,5 +186,5 @@ clean:
 help:
 	@echo "Usage: make [target] [VARIABLES]"
 	@echo "Targets: all, powershell, clean, help"
-	@echo "Variables: PYTHON_VERSION, ARCH, FREE_THREADED (0|1), UBUNTU_VERSION"
+	@echo "Variables: PYTHON_VERSION, ARCH, FREE_THREADED (0|1), UBUNTU_VERSION, TRIVY_VERSION"
 	@echo "Output: $(HOST_ARTIFACT_NAME)"
