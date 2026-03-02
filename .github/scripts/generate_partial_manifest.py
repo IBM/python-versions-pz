@@ -7,7 +7,7 @@ PREFIXES = ("python-", "trivy-python-")
 SUFFIXES = (".tar.gz", ".sbom.json", ".json", ".log")
 
 
-def validate_download_url(url: str, owner: str, repo: str, tag: str, filename: str) -> bool:
+def validate_download_url(url: str, owner: str, repo: str, _tag: str, _filename: str) -> bool:
     """Validate that download_url is well-formed and points to a release asset.
     
     Note: GitHub may initially serve assets via temporary "untagged" URLs.
@@ -52,11 +52,15 @@ def parse_filename(filename: str) -> Optional[Dict[str, str]]:
     if len(parts) < 4:
         return None
 
+    arch = "-".join(parts[3:])
+    if not arch:
+        return None
+
     return {
         "version": parts[0],
         "platform": parts[1],
         "platform_version": parts[2],
-        "arch": parts[3],
+        "arch": arch,
     }
 
 
@@ -130,7 +134,7 @@ def main() -> int:
                 assets = json.load(f)
         elif args.assets:
             # Legacy support for workflows passing raw strings
-            print(f"Parsing assets from command-line string", file=sys.stderr)
+            print("Parsing assets from command-line string", file=sys.stderr)
             assets = json.loads(args.assets)
     except json.JSONDecodeError as exc:
         print(f"Error decoding JSON: {exc}", file=sys.stderr)
@@ -146,7 +150,7 @@ def main() -> int:
         for error in errors:
             print(f"Validation error: {error}", file=sys.stderr)
         if not manifest_entries:
-            print(f"ERROR: No valid assets found after validation. Aborting.", file=sys.stderr)
+            print("ERROR: No valid assets found after validation. Aborting.", file=sys.stderr)
             return 1
         # Warn but continue if some assets are valid
         print(f"Warning: {len(errors)} asset(s) failed validation but {len(manifest_entries)} remain.", file=sys.stderr)
