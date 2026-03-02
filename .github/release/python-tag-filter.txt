@@ -1,5 +1,5 @@
 # Release filter configuration for release-matching-python-tags workflow
-# Format: YAML with version and release_types
+# Format: YAML with version, release_types, and variants
 
 # Example 1: Only stable releases of 3.14
 # version: 3.14.*
@@ -16,9 +16,6 @@
 # variants:
 #   - default
 #   - freethreaded
-
-# Legacy compatibility (optional):
-# free_threaded: true
 
 # Current configuration:
 version: 3.15.*

@@ -63,13 +63,7 @@ jobs:
           with open('.github/release/python-tag-filter.txt', 'r') as f:
               config = yaml.safe_load(f) or {}
 
-          variants = config.get('variants')
-          if variants is None:
-              free_threaded = config.get('free_threaded')
-              if isinstance(free_threaded, bool):
-                  variants = ['default', 'freethreaded'] if free_threaded else ['default']
-              else:
-                  variants = ['default']
+          variants = config.get('variants', ['default'])
 
           if isinstance(variants, str):
               variants = [variants]

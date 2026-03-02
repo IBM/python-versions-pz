@@ -196,43 +196,6 @@ print('VARIANTS=' + json.dumps(normalized))
         finally:
             os.unlink(temp_file)
 
-    def test_yaml_parsing_with_free_threaded_fallback(self):
-        """Test legacy free_threaded boolean fallback to variants."""
-        yaml_content = """version: 3.14.*
-release_types: [stable]
-free_threaded: true
-"""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
-            f.write(yaml_content)
-            temp_file = f.name
-
-        try:
-            python_code = f"""
-import json
-import yaml
-with open(r'''{temp_file}''', 'r') as f:
-    config = yaml.safe_load(f) or {{}}
-variants = config.get('variants')
-if variants is None:
-    free_threaded = config.get('free_threaded')
-    if isinstance(free_threaded, bool):
-        variants = ['default', 'freethreaded'] if free_threaded else ['default']
-    else:
-        variants = ['default']
-print('VARIANTS=' + json.dumps(variants))
-"""
-            result = subprocess.run(
-                [sys.executable, '-c', python_code],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-
-            output = result.stdout.strip()
-            assert 'VARIANTS=["default", "freethreaded"]' in output
-        finally:
-            os.unlink(temp_file)
-
     def test_filter_to_command_args_conversion(self):
         """Test converting filter values to shell command arguments."""
         test_cases = [

@@ -8,6 +8,8 @@ The release-matching workflow uses a YAML-based filter file to control which Pyt
 ### Format
 The file uses YAML format with the following fields:
 
+Preferred format for new configs: use `version`, `release_types`, and `variants`.
+
 - **version**: A glob pattern to match Python versions (e.g., `3.14.*`, `3.13.*`)
 - **release_types**: An array of release types to include. Valid values:
   - `stable` - Production releases (e.g., 3.14.0, 3.13.5)
@@ -17,9 +19,6 @@ The file uses YAML format with the following fields:
 - **variants**: Build variants to include. Valid values:
   - `default` - Standard Python build
   - `freethreaded` - Free-threaded Python build (`-freethreaded` artifact suffix)
-
-Legacy compatibility is also supported with:
-- **free_threaded**: Boolean shortcut (`true` maps to `variants: [default, freethreaded]`)
 
 ### Examples
 
