@@ -21,7 +21,7 @@ ACTIONS_PYTHON_VERSIONS ?= 3.15.0-alpha.5-21016111327
 POWERSHELL_VERSION      ?= v7.5.2
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
-TRIVY_VERSION           ?= v0.68.2
+TRIVY_VERSION           ?= v0.69.2
 
 # Security Gates (0 = Log Only, 1 = Fail Build)
 FAIL_ON_CRITICAL        ?= 1
@@ -72,13 +72,13 @@ PS_PREREQS := \
 
 # --- Targets ------------------------------------------------------------------
 
-.PHONY: all powershell clean help verify-gate
+.PHONY: all powershell clean help verify-gate verify-trivy-version verify-trivy-checksums
 
 # Updated 'all' to target the new host artifact name
 all: $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME) verify-gate
 
 # 1. Build the Python Artifact
-$(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): powershell | $(OUTPUT_DIR)
+$(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): verify-trivy-version verify-trivy-checksums powershell | $(OUTPUT_DIR)
 	@echo "--- Building Python $(PYTHON_VERSION) Image ($(ARCH)) ---"
 	@echo "    Security Gate: CRIT=$(FAIL_ON_CRITICAL) HIGH=$(FAIL_ON_HIGH)"
 	$(Q)cd python-versions && $(CONTAINER_ENGINE) build \
@@ -136,6 +136,19 @@ verify-gate:
 		echo ""; \
 	fi
 
+verify-trivy-version:
+	@echo "--- Verifying Trivy release $(TRIVY_VERSION) ---"
+	@curl -fsSL "https://api.github.com/repos/aquasecurity/trivy/releases/tags/$(TRIVY_VERSION)" >/dev/null || \
+		(echo "ERROR: Trivy release $(TRIVY_VERSION) not found. Set a valid TRIVY_VERSION (e.g. v0.69.2)." && exit 1)
+
+verify-trivy-checksums:
+	@echo "--- Verifying pinned Trivy checksums for $(TRIVY_VERSION) ---"
+	@trivy_version="$(TRIVY_VERSION)"; trivy_version="$${trivy_version#v}"; \
+	for arch in 64bit ARM64 PPC64LE s390x; do \
+		asset="trivy_$${trivy_version}_Linux-$${arch}.tar.gz"; \
+		awk -v asset="$${asset}" '{sub(/\r$$/, "", $$2)} $$2 == asset && $$1 ~ /^[0-9a-f]{64}$$/ {found=1} END {exit found ? 0 : 1}' python-versions/trivy-checksums.txt || \
+			(echo "ERROR: Missing pinned checksum for $${asset} in python-versions/trivy-checksums.txt" && exit 1); \
+	done
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
