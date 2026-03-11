@@ -47,8 +47,32 @@ RUN apt-get -qq update -y && \
     python3 pkg-config sudo libmpdec-dev libbluetooth-dev libz-dev || true) && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Trivy
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin ${TRIVY_VERSION}
+# Pinned checksums are maintained in-repo for auditable Trivy installs.
+COPY trivy-checksums.txt /tmp/trivy-checksums.txt
+
+# Install Trivy (checksum pinned in-repo)
+RUN set -eux; \
+    trivy_version="${TRIVY_VERSION#v}"; \
+    case "${TARGETARCH}" in \
+        amd64) trivy_arch="64bit" ;; \
+        arm64) trivy_arch="ARM64" ;; \
+        ppc64le) trivy_arch="PPC64LE" ;; \
+        s390x) trivy_arch="s390x" ;; \
+        *) echo "Unsupported TARGETARCH for Trivy install: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    trivy_archive="trivy_${trivy_version}_Linux-${trivy_arch}.tar.gz"; \
+    trivy_sha256="$(awk -v archive="${trivy_archive}" 'BEGIN{found=""} {sub(/\r$/, "", $2)} $2 == archive && $1 ~ /^[0-9a-f]{64}$/ {found=$1} END{print found}' /tmp/trivy-checksums.txt)"; \
+    if [ -z "${trivy_sha256}" ]; then \
+        echo "No pinned Trivy checksum for ${trivy_archive}. Update python-versions/trivy-checksums.txt." >&2; \
+        exit 1; \
+    fi; \
+    trivy_base_url="https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}"; \
+    curl -fsSLo /tmp/trivy.tar.gz "${trivy_base_url}/${trivy_archive}"; \
+    echo "${trivy_sha256}  /tmp/trivy.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/trivy.tar.gz -C /tmp trivy; \
+    install -m 0755 /tmp/trivy /usr/local/bin/trivy; \
+    rm -f /tmp/trivy /tmp/trivy.tar.gz /tmp/trivy-checksums.txt; \
+    trivy --version
 
 # Clone Python Sources
 RUN if [ ! -d /python-versions ]; then git clone https://github.com/actions/python-versions.git /python-versions; fi

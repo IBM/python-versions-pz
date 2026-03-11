@@ -1,7 +1,7 @@
 name: Release Matching Python Tags
 # This workflow intentionally does not use workflow_dispatch inputs to comply with policy.
 # To control which tags to release, create a one-line file at
-# .github/release/python-tag-filter.txt (e.g., 3.13.*). If absent/empty, it
+# .github/release/python-tag-filter.yml (e.g., 3.13.*). If absent/empty, it
 # derives a filter from the latest version (e.g., 3.13.*).
 
 on:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch: {}
   push:
     paths:
-      - .github/release/python-tag-filter.txt
+      - .github/release/python-tag-filter.yml
 
 permissions:
   contents: write    # Required for release workflow to push manifest and assets
@@ -43,26 +43,48 @@ jobs:
       - name: Get Python tags matching filter
         id: collect
         run: |
-          # Optional file-based filter override to keep functionality without inputs
-          filter_file=".github/release/python-tag-filter.txt"
+          # Parse YAML filter file
+          filter_file=".github/release/python-tag-filter.yml"
+          VERSION_FILTER=""
+          RELEASE_TYPES="stable"
+          
           if [ -f "$filter_file" ]; then
-            FILTER=$( (grep -vE '^\s*(#|$)' "$filter_file" | head -n1 | tr -d '\r') || true )
-            if [ -n "$FILTER" ]; then
-              echo "Using filter from $filter_file: $FILTER"
-            else
-              unset FILTER
-            fi
+            # Use Python to parse YAML (within poetry environment)
+            read VERSION_FILTER RELEASE_TYPES < <(poetry run python << 'EOF'
+          import yaml
+          import sys
+          
+          try:
+              with open('.github/release/python-tag-filter.yml', 'r') as f:
+                  config = yaml.safe_load(f)
+                  if config:
+                      version = config.get('version', '').strip()
+                      release_types = config.get('release_types', ['stable'])
+                      # Normalize release_types to space-separated string
+                      if isinstance(release_types, list):
+                          release_types = ' '.join(release_types)
+                      print(f"{version} {release_types}")
+          except Exception as e:
+              print(f"Error parsing YAML: {e}", file=sys.stderr)
+              sys.exit(1)
+          EOF
+            )
           fi
-
-          if [ -z "${FILTER:-}" ]; then
-            LATEST=$(poetry run python .github/scripts/get_python_version.py --latest)
+          
+          # If no filter provided, derive from latest version
+          if [ -z "$VERSION_FILTER" ]; then
+            LATEST=$(poetry run python .github/scripts/get_python_version.py --latest --release-types stable)
             echo "No filter supplied, fetched latest tag: $LATEST"
             # Convert latest version like 3.13.3 to 3.13.*
-            FILTER=$(echo "$LATEST" | sed -E 's/\.[0-9]+$/.*/')
-            echo "Derived filter: $FILTER"
+            VERSION_FILTER=$(echo "$LATEST" | sed -E 's/\.[0-9]+$/.*/')
+            echo "Derived filter: $VERSION_FILTER"
+            RELEASE_TYPES="stable"
           fi
-
-          TAGS=$(poetry run python .github/scripts/get_python_version.py --list --filter "$FILTER")
+          
+          echo "Using version filter: $VERSION_FILTER"
+          echo "Using release types: $RELEASE_TYPES"
+          
+          TAGS=$(poetry run python .github/scripts/get_python_version.py --list --filter "$VERSION_FILTER" --release-types $RELEASE_TYPES)
           echo "Raw tags found:"
           echo "$TAGS"
 
