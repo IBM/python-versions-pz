@@ -1,7 +1,7 @@
 name: Release Matching Python Tags
 # This workflow intentionally does not use workflow_dispatch inputs to comply with policy.
 # To control which tags to release, create a one-line file at
-# .github/release/python-tag-filter.txt (e.g., 3.13.*). If absent/empty, it
+# .github/release/python-tag-filter.yml (e.g., 3.13.*). If absent/empty, it
 # derives a filter from the latest version (e.g., 3.13.*).
 
 on:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch: {}
   push:
     paths:
-      - .github/release/python-tag-filter.txt
+      - .github/release/python-tag-filter.yml
 
 permissions:
   contents: write    # Required for release workflow to push manifest and assets
@@ -44,7 +44,7 @@ jobs:
         id: collect
         run: |
           # Parse YAML filter file
-          filter_file=".github/release/python-tag-filter.txt"
+          filter_file=".github/release/python-tag-filter.yml"
           VERSION_FILTER=""
           RELEASE_TYPES="stable"
           
@@ -55,7 +55,7 @@ jobs:
           import sys
           
           try:
-              with open('.github/release/python-tag-filter.txt', 'r') as f:
+              with open('.github/release/python-tag-filter.yml', 'r') as f:
                   config = yaml.safe_load(f)
                   if config:
                       version = config.get('version', '').strip()

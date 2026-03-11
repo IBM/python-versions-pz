@@ -3,7 +3,7 @@
 The release-matching workflow uses a YAML-based filter file to control which Python versions are released.
 
 ### Filter File Location
-`.github/release/python-tag-filter.txt`
+`.github/release/python-tag-filter.yml`
 
 ### Format
 The file uses YAML format with the following fields:
@@ -47,7 +47,7 @@ release_types: [stable, beta, rc, alpha]
 
 The workflow is triggered in two ways:
 1. **Manual trigger**: `workflow_dispatch` (manual run in GitHub Actions UI)
-2. **Automatic trigger**: Any push to `.github/release/python-tag-filter.txt`
+2. **Automatic trigger**: Any push to `.github/release/python-tag-filter.yml`
 
 Simply commit and push changes to this file to automatically trigger a release for matching versions.
 
