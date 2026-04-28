@@ -21,7 +21,7 @@ ACTIONS_PYTHON_VERSIONS ?= 3.15.0-alpha.5-21016111327
 POWERSHELL_VERSION      ?= v7.5.2
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
-TRIVY_VERSION           ?= v0.69.2
+TRIVY_VERSION           ?= v0.70.0
 
 # Security Gates (0 = Log Only, 1 = Fail Build)
 FAIL_ON_CRITICAL        ?= 1
