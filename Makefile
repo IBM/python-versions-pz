@@ -17,11 +17,12 @@ endif
 
 # Versioning
 PYTHON_VERSION          ?= 3.13.3
-ACTIONS_PYTHON_VERSIONS ?= 3.15.0-alpha.5-21016111327
+ACTIONS_PYTHON_VERSIONS ?= 3.13.3-14344076652
 POWERSHELL_VERSION      ?= v7.5.2
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
-TRIVY_VERSION           ?= v0.70.0
+TRIVY_VERSION_FILE      ?= .trivyversion
+TRIVY_VERSION           ?= $(strip $(shell if [ -f "$(TRIVY_VERSION_FILE)" ]; then cat "$(TRIVY_VERSION_FILE)"; else echo v0.70.0; fi))
 
 # Security Gates (0 = Log Only, 1 = Fail Build)
 FAIL_ON_CRITICAL        ?= 1
@@ -139,7 +140,7 @@ verify-gate:
 verify-trivy-version:
 	@echo "--- Verifying Trivy release $(TRIVY_VERSION) ---"
 	@curl -fsSL "https://api.github.com/repos/aquasecurity/trivy/releases/tags/$(TRIVY_VERSION)" >/dev/null || \
-		(echo "ERROR: Trivy release $(TRIVY_VERSION) not found. Set a valid TRIVY_VERSION (e.g. v0.69.2)." && exit 1)
+		(echo "ERROR: Trivy release $(TRIVY_VERSION) not found. Set a valid TRIVY_VERSION (or update .trivyversion, e.g. v0.70.0)." && exit 1)
 
 verify-trivy-checksums:
 	@echo "--- Verifying pinned Trivy checksums for $(TRIVY_VERSION) ---"
