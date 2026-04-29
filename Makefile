@@ -139,17 +139,11 @@ verify-gate:
 
 verify-trivy-version:
 	@echo "--- Verifying Trivy release $(TRIVY_VERSION) ---"
-	@curl -fsSL "https://api.github.com/repos/aquasecurity/trivy/releases/tags/$(TRIVY_VERSION)" >/dev/null || \
-		(echo "ERROR: Trivy release $(TRIVY_VERSION) not found. Set a valid TRIVY_VERSION (or update .trivyversion, e.g. v0.70.0)." && exit 1)
+	@./scripts/verify-trivy.sh tag "$(TRIVY_VERSION)"
 
 verify-trivy-checksums:
 	@echo "--- Verifying pinned Trivy checksums for $(TRIVY_VERSION) ---"
-	@trivy_version="$(TRIVY_VERSION)"; trivy_version="$${trivy_version#v}"; \
-	for arch in 64bit ARM64 PPC64LE s390x; do \
-		asset="trivy_$${trivy_version}_Linux-$${arch}.tar.gz"; \
-		awk -v asset="$${asset}" '{sub(/\r$$/, "", $$2)} $$2 == asset && $$1 ~ /^[0-9a-f]{64}$$/ {found=1} END {exit found ? 0 : 1}' python-versions/trivy-checksums.txt || \
-			(echo "ERROR: Missing pinned checksum for $${asset} in python-versions/trivy-checksums.txt" && exit 1); \
-	done
+	@./scripts/verify-trivy.sh checksums "$(TRIVY_VERSION)"
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
