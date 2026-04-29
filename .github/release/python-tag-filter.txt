@@ -21,4 +21,4 @@
 
 # Current configuration:
 version: 3.14.4
-release_types: [stable]
+release_types: [stable ]
