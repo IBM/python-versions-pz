@@ -2,16 +2,27 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 {tag|checksums} <TRIVY_VERSION>" >&2
+  echo "Usage: $0 {tag|checksums} [TRIVY_VERSION]" >&2
+  echo "If TRIVY_VERSION is omitted the script will read .trivyversion or default to v0.70.0." >&2
   exit 2
 }
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
   usage
 fi
 
 cmd="$1"; shift
-TRIVY_VERSION="$1"
+
+if [ $# -ge 1 ]; then
+  TRIVY_VERSION="$1"
+else
+  TRIVY_VERSION_FILE=".trivyversion"
+  if [ -f "${TRIVY_VERSION_FILE}" ]; then
+    TRIVY_VERSION="$(cat "${TRIVY_VERSION_FILE}")"
+  else
+    TRIVY_VERSION="v0.70.0"
+  fi
+fi
 
 case "$cmd" in
   tag)
