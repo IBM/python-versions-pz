@@ -1,12 +1,12 @@
 diff --git a/build.psm1 b/build.psm1
-index d353eb251..bc0f2c9ca 100644
+index d353eb251..a8b2be31d 100644
 --- a/build.psm1
 +++ b/build.psm1
 @@ -425,6 +425,7 @@ function Start-PSBuild {
                       "linux-arm",
                       "linux-arm64",
                       "linux-x64",
-+                    "linux-ppc64le",
++                    "linux-ppc64el",
                       "osx-arm64",
                       "osx-x64",
                       "win-arm",
@@ -14,10 +14,10 @@ index d353eb251..bc0f2c9ca 100644
      }
  
      $Arguments += "/property:AppDeployment=$AppDeployment"
-+    # As the ReadyToRun package for linux-ppc64le is not available on NuGet,
++    # As the ReadyToRun package for linux-ppc64el is not available on NuGet,
 +    # we must explicitly disable ReadyToRun compilation for this runtime.
 +    # This addresses the NETSDK1094 error for this specific platform.
-+    if ($Options.Runtime -eq 'linux-ppc64le') {
++    if ($Options.Runtime -eq 'linux-ppc64el') {
 +        $Arguments += "/property:PublishReadyToRun=false"
 +        $Arguments += "/property:WarnAsError=false" # Do not treat warnings as errors for ppc64le
 +        $Arguments += "/property:RunAnalyzers=false" # Disable analyzers for ppc64le
@@ -29,7 +29,7 @@ index d353eb251..bc0f2c9ca 100644
                       "linux-arm",
                       "linux-arm64",
                       "linux-x64",
-+                    "linux-ppc64le",
++                    "linux-ppc64el",
                       "osx-arm64",
                       "osx-x64",
                       "win-arm",
