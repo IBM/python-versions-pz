@@ -5,9 +5,12 @@ ARG POWERSHELL_VERSION=v7.5.1
 # Base stage for reuse
 FROM ubuntu:${UBUNTU_VERSION} AS base
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 RUN apt-get -qq update && \
-    apt-get -qq install -y git curl ca-certificates && \
+    apt-get -qq install -y git curl ca-certificates locales && \
+    locale-gen C.UTF-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Build libpsl-native using base

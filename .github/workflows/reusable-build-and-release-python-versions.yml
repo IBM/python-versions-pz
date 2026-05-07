@@ -45,6 +45,8 @@ jobs:
           fi
 
       - name: Build Python artifact using Makefile
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           make CONTAINER_ENGINE="sudo docker" PYTHON_VERSION=${{ inputs.tag }} ARCH=${{ inputs.arch }} UBUNTU_VERSION=${{ inputs.platform-version }}
 
