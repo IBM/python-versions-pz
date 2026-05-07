@@ -53,6 +53,8 @@ make verify-trivy-checksums TRIVY_VERSION=v0.70.0
 
 This updates both `.trivyversion` and `python-versions/trivy-checksums.txt` from the upstream Trivy release checksums file.
 
+The Trivy asset naming logic is centralized in `python-versions/trivy-assets.sh`, and both the host-side verification/update scripts and the Docker build use it.
+
 ### GitHub Actions Automation
 
 The included workflow (`.github/workflows/build-and-release-python-versions.yml`) will:

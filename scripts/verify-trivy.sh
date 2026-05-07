@@ -2,7 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/trivy-assets.sh"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+source "${REPO_ROOT}/python-versions/trivy-assets.sh"
 
 usage() {
   echo "Usage: $0 {tag|checksums} [TRIVY_VERSION]" >&2
@@ -91,7 +92,7 @@ case "$cmd" in
     trivy_version="${TRIVY_VERSION#v}"
     while IFS= read -r arch; do
       asset="$(trivy_asset_name "$trivy_version" "$arch")"
-      if ! awk -v asset="$asset" '{sub(/\r$$/, "", $2)} $2 == asset && $1 ~ /^[0-9a-f]{64}$/ {found=1} END {exit found ? 0 : 1}' python-versions/trivy-checksums.txt; then
+      if ! awk -v asset="$asset" '{sub(/\r$$/, "", $2)} $2 == asset && length($1) == 64 && $1 ~ /^[0-9a-f]+$/ {found=1} END {exit found ? 0 : 1}' python-versions/trivy-checksums.txt; then
         echo "ERROR: Missing pinned checksum for ${asset} in python-versions/trivy-checksums.txt" >&2
         exit 1
       fi

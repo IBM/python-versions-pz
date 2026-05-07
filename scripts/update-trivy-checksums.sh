@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-source "${SCRIPT_DIR}/trivy-assets.sh"
+source "${REPO_ROOT}/python-versions/trivy-assets.sh"
 
 usage() {
   echo "Usage: $0 [TRIVY_VERSION] [--output FILE] [--version-file FILE]" >&2
@@ -65,7 +65,7 @@ curl -fsSL \
 
   while IFS= read -r arch; do
     asset="$(trivy_asset_name "$trivy_version" "$arch")"
-    line="$(awk -v asset="$asset" '$2 == asset && $1 ~ /^[0-9a-f]{64}$/ {print $1 "  " $2; found=1; exit} END {if (!found) exit 1}' "$tmp_checksums")" || {
+    line="$(awk -v asset="$asset" '$2 == asset && length($1) == 64 && $1 ~ /^[0-9a-f]+$/ {print $1 "  " $2; found=1; exit} END {if (!found) exit 1}' "$tmp_checksums")" || {
       echo "ERROR: Missing checksum for ${asset} in upstream checksums file." >&2
       exit 1
     }
