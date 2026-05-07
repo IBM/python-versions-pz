@@ -73,7 +73,7 @@ PS_PREREQS := \
 
 # --- Targets ------------------------------------------------------------------
 
-.PHONY: all powershell clean help verify-gate verify-trivy-version verify-trivy-checksums
+.PHONY: all powershell clean help verify-gate verify-trivy-version verify-trivy-checksums update-trivy-pins
 
 # Updated 'all' to target the new host artifact name
 all: $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME) verify-gate
@@ -139,11 +139,15 @@ verify-gate:
 
 verify-trivy-version:
 	@echo "--- Verifying Trivy release $(TRIVY_VERSION) ---"
-	@./scripts/verify-trivy.sh tag "$(TRIVY_VERSION)"
+	@bash ./scripts/verify-trivy.sh tag "$(TRIVY_VERSION)"
 
 verify-trivy-checksums:
 	@echo "--- Verifying pinned Trivy checksums for $(TRIVY_VERSION) ---"
-	@./scripts/verify-trivy.sh checksums "$(TRIVY_VERSION)"
+	@bash ./scripts/verify-trivy.sh checksums "$(TRIVY_VERSION)"
+
+update-trivy-pins:
+	@echo "--- Updating Trivy version pin $(TRIVY_VERSION) ---"
+	@bash ./scripts/update-trivy-checksums.sh "$(TRIVY_VERSION)"
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"

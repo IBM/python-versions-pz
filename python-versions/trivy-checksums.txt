@@ -2,7 +2,7 @@
 # Format: <sha256>  <filename>
 # Source: https://github.com/aquasecurity/trivy/releases
 
-a9f6ce99fa942759ee914d821b9ad38b6d6887e7d1b4d4415c1c9c7387c7bc94  trivy_0.70.0_Linux-64bit.tar.gz
+8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9  trivy_0.70.0_Linux-64bit.tar.gz
 2f6bb988b553a1bbac6bdd1ce890f5e412439564e17522b88a4541b4f364fc8d  trivy_0.70.0_Linux-ARM64.tar.gz
 ddc8fb59164e16a9973f46b77b7556de2923ac295731910822f0851ec9edfb01  trivy_0.70.0_Linux-PPC64LE.tar.gz
 92ec9caffdcc32d43b76d21d4ecd6ea2975a2b37e050d5f79e17651c490b1753  trivy_0.70.0_Linux-s390x.tar.gz

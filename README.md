@@ -43,6 +43,16 @@ make PYTHON_VERSION=<version> ARCH=<arch>
 make
 ```
 
+### Update Trivy Pins
+
+```sh
+make update-trivy-pins TRIVY_VERSION=v0.70.0
+make verify-trivy-version TRIVY_VERSION=v0.70.0
+make verify-trivy-checksums TRIVY_VERSION=v0.70.0
+```
+
+This updates both `.trivyversion` and `python-versions/trivy-checksums.txt` from the upstream Trivy release checksums file.
+
 ### GitHub Actions Automation
 
 The included workflow (`.github/workflows/build-and-release-python-versions.yml`) will:

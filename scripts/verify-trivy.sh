@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/trivy-assets.sh"
+
 usage() {
   echo "Usage: $0 {tag|checksums} [TRIVY_VERSION]" >&2
   echo "If TRIVY_VERSION is omitted the script will read .trivyversion or default to v0.70.0." >&2
@@ -52,50 +55,47 @@ request_release_tag() {
 
 case "$cmd" in
   tag)
-    url="https://api.github.com/repos/aquasecurity/trivy/releases/tags/${TRIVY_VERSION}"
-    curl_args=(
-      "$url"
-      -H "User-Agent: curl"
-      -H "Accept: application/vnd.github+json"
-    )
-    if [ -n "${GITHUB_TOKEN:-}" ]; then
-      curl_args+=( -H "Authorization: Bearer ${GITHUB_TOKEN}" )
-    fi
+    trivy_version="${TRIVY_VERSION#v}"
+    while IFS= read -r arch; do
+      asset_ok=0
+      asset="$(trivy_asset_name "$trivy_version" "$arch")"
+      url="https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/${asset}"
 
-    for attempt in 1 2 3; do
-      if request_release_tag "${curl_args[@]}"; then
-        exit 0
+      for attempt in 1 2 3; do
+        if request_release_tag "$url" -H "User-Agent: curl" -H "Accept: application/octet-stream"; then
+          asset_ok=1
+          break
+        fi
+        rm -f "$RELEASE_TAG_HEADERS_FILE" "$RELEASE_TAG_RESPONSE_FILE"
+        if [ "$attempt" -lt 3 ]; then
+          sleep 1
+        fi
+      done
+
+      if [ "$asset_ok" -ne 1 ]; then
+        echo "ERROR: Trivy asset ${asset} for ${TRIVY_VERSION} is unavailable." >&2
+        echo "URL: ${url}" >&2
+        echo "HTTP status: ${RELEASE_TAG_HTTP_CODE:-000}; curl exit: ${RELEASE_TAG_CURL_EXIT:-1}" >&2
+        if [ -f "${RELEASE_TAG_RESPONSE_FILE:-}" ]; then
+          tr -d '\r' < "$RELEASE_TAG_RESPONSE_FILE" | sed -n '1,10p' >&2 || true
+        fi
+        rm -f "${RELEASE_TAG_HEADERS_FILE:-}" "${RELEASE_TAG_RESPONSE_FILE:-}"
+        exit 1
       fi
-      rm -f "$RELEASE_TAG_HEADERS_FILE" "$RELEASE_TAG_RESPONSE_FILE"
-      sleep 1
-    done
-
-    echo "ERROR: Trivy release ${TRIVY_VERSION} lookup failed via GitHub API." >&2
-    echo "HTTP status: ${RELEASE_TAG_HTTP_CODE}; curl exit: ${RELEASE_TAG_CURL_EXIT}" >&2
-    if [ -z "${GITHUB_TOKEN:-}" ]; then
-      echo "GITHUB_TOKEN was not set. In CI, pass the step-scoped token explicitly." >&2
-    elif [ "$RELEASE_TAG_HTTP_CODE" = "403" ]; then
-      echo "GitHub API returned 403. Verify token availability, token permissions, and API rate limits." >&2
-    elif [ "$RELEASE_TAG_HTTP_CODE" = "404" ]; then
-      echo "Release tag ${TRIVY_VERSION} was not found. Update .trivyversion if needed." >&2
-    fi
-    if [ -f "$RELEASE_TAG_RESPONSE_FILE" ]; then
-      tr -d '\r' < "$RELEASE_TAG_RESPONSE_FILE" | sed -n '1,10p' >&2 || true
-    fi
-    rm -f "$RELEASE_TAG_HEADERS_FILE" "$RELEASE_TAG_RESPONSE_FILE"
-    exit 1
+    done < <(trivy_supported_arches)
+    exit 0
     ;;
 
   checksums)
     # Verify pinned checksums file contains entries for expected assets
     trivy_version="${TRIVY_VERSION#v}"
-    for arch in 64bit ARM64 PPC64LE s390x; do
-      asset="trivy_${trivy_version}_Linux-${arch}.tar.gz"
+    while IFS= read -r arch; do
+      asset="$(trivy_asset_name "$trivy_version" "$arch")"
       if ! awk -v asset="$asset" '{sub(/\r$$/, "", $2)} $2 == asset && $1 ~ /^[0-9a-f]{64}$/ {found=1} END {exit found ? 0 : 1}' python-versions/trivy-checksums.txt; then
         echo "ERROR: Missing pinned checksum for ${asset} in python-versions/trivy-checksums.txt" >&2
         exit 1
       fi
-    done
+    done < <(trivy_supported_arches)
     ;;
 
   *)
