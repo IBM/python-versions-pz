@@ -82,7 +82,13 @@ all: $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME) verify-gate
 $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): verify-trivy-version verify-trivy-checksums powershell | $(OUTPUT_DIR)
 	@echo "--- Building Python $(PYTHON_VERSION) Image ($(ARCH)) ---"
 	@echo "    Security Gate: CRIT=$(FAIL_ON_CRITICAL) HIGH=$(FAIL_ON_HIGH)"
-	$(Q)cd python-versions && $(CONTAINER_ENGINE) build \
+	$(Q)cd python-versions && \
+		secret_flags=""; \
+		if [ -n "$${GITHUB_TOKEN:-}" ]; then \
+			secret_flags="--secret id=github_token,env=GITHUB_TOKEN"; \
+		fi; \
+		DOCKER_BUILDKIT=1 $(CONTAINER_ENGINE) build \
+			$$secret_flags \
 		--network=host \
 		--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
 		--build-arg ACTIONS_PYTHON_VERSIONS=$(ACTIONS_PYTHON_VERSIONS) \
