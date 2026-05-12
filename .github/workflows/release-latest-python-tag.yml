@@ -24,9 +24,9 @@ jobs:
       latest_tag: ${{ steps.get_tag.outputs.latest_tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
       - name: Install Python dependencies
@@ -90,20 +90,20 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download partial manifest artifacts # Pull the short-lived JSON blobs produced by the release job
         continue-on-error: true # Missing artifacts just mean no new manifests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: manifest-parts
           pattern: manifest-part-*
           merge-multiple: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
