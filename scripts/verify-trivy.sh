@@ -31,6 +31,13 @@ fi
 request_release_tag() {
   local url="$1"
   local headers_file body_file http_code curl_exit
+  local curl_auth_args=()
+
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    curl_auth_args=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+  elif [ -n "${GH_TOKEN:-}" ]; then
+    curl_auth_args=(-H "Authorization: Bearer ${GH_TOKEN}")
+  fi
 
   headers_file="$(mktemp)"
   body_file="$(mktemp)"
@@ -40,6 +47,7 @@ request_release_tag() {
     -D "$headers_file" \
     -o "$body_file" \
     -w '%{http_code}' \
+    "${curl_auth_args[@]}" \
     "$@")" || curl_exit=$?
 
   if [ "$curl_exit" -eq 0 ] && [ "$http_code" = "200" ]; then

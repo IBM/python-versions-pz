@@ -53,7 +53,8 @@ COPY trivy-assets.sh /tmp/trivy-assets.sh
 COPY install-trivy.sh /tmp/install-trivy.sh
 
 # Install Trivy (checksum pinned in-repo)
-RUN bash /tmp/install-trivy.sh "${TRIVY_VERSION}" "${TARGETARCH}" /tmp/trivy-checksums.txt && \
+RUN --mount=type=secret,id=github_token,required=false \
+    bash /tmp/install-trivy.sh "${TRIVY_VERSION}" "${TARGETARCH}" /tmp/trivy-checksums.txt && \
     rm -f /tmp/install-trivy.sh /tmp/trivy-assets.sh /tmp/trivy-checksums.txt
 
 # Clone Python Sources

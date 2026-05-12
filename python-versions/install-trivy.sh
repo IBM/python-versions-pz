@@ -15,6 +15,30 @@ checksum_file="$3"
 download_path="/tmp/trivy.tar.gz"
 extract_dir="/tmp"
 
+get_github_token() {
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    printf '%s' "$GITHUB_TOKEN"
+    return 0
+  fi
+
+  if [ -n "${GH_TOKEN:-}" ]; then
+    printf '%s' "$GH_TOKEN"
+    return 0
+  fi
+
+  if [ -n "${GITHUB_TOKEN_FILE:-}" ] && [ -f "${GITHUB_TOKEN_FILE}" ]; then
+    tr -d '\r\n' < "${GITHUB_TOKEN_FILE}"
+    return 0
+  fi
+
+  if [ -f /run/secrets/github_token ]; then
+    tr -d '\r\n' < /run/secrets/github_token
+    return 0
+  fi
+
+  return 1
+}
+
 if ! trivy_arch="$(trivy_arch_for_targetarch "$target_arch")"; then
   echo "Unsupported TARGETARCH for Trivy install: ${target_arch}" >&2
   exit 1
@@ -29,7 +53,12 @@ if [ -z "$trivy_sha256" ]; then
 fi
 
 trivy_base_url="https://github.com/aquasecurity/trivy/releases/download/${trivy_version}"
-curl -fsSLo "$download_path" "${trivy_base_url}/${trivy_archive}"
+curl_auth_args=()
+if github_token="$(get_github_token || true)" && [ -n "$github_token" ]; then
+  curl_auth_args=(-H "Authorization: Bearer ${github_token}")
+fi
+
+curl -fsSLo "$download_path" "${curl_auth_args[@]}" "${trivy_base_url}/${trivy_archive}"
 echo "${trivy_sha256}  ${download_path}" | sha256sum -c -
 tar -xzf "$download_path" -C "$extract_dir" trivy
 install -m 0755 "${extract_dir}/trivy" /usr/local/bin/trivy
