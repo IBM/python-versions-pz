@@ -14,5 +14,5 @@
 #   - alpha
 
 # Current configuration:
-version: 3.14.4
+version: 3.14.5
 release_types: [stable] 
