@@ -9,6 +9,9 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
+# BuildKit is required for --secret mounts (GitHub token forwarding)
+export DOCKER_BUILDKIT := 1
+
 ifeq ($(origin V), undefined)
   Q := @
 else
@@ -16,8 +19,10 @@ else
 endif
 
 # Versioning
-PYTHON_VERSION          ?= 3.14.4
-ACTIONS_PYTHON_VERSIONS ?= 3.13.3-14344076652
+PYTHON_VERSION          ?= 3.14.5
+# Auto-resolve from upstream releases unless explicitly overridden.
+# To pin a specific tag: make ACTIONS_PYTHON_VERSIONS=3.14.4-25113653268 ...
+ACTIONS_PYTHON_VERSIONS ?= $(shell ./scripts/resolve-upstream-tag.sh $(PYTHON_VERSION))
 POWERSHELL_VERSION      ?= v7.6.1
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
@@ -40,12 +45,17 @@ else
   ARCH := $(ARCH_RAW)
 endif
 
-# Container Engine Detection
-CONTAINER_ENGINE := $(shell command -v podman 2>/dev/null || command -v docker)
+# Container Engine (Docker required — BuildKit needed for secret mounts)
+CONTAINER_ENGINE := $(shell command -v docker)
 
 ifeq ($(strip $(CONTAINER_ENGINE)),)
-  $(error No container runtime found. Please install `docker` or `podman`)
+  $(error Docker is required. BuildKit is needed for --secret mounts.)
 endif
+
+# Secret flags for Docker BuildKit (forwards GITHUB_TOKEN into the build)
+# Empty if GITHUB_TOKEN is not set — the Dockerfile handles missing secrets.
+c := ,
+DOCKER_SECRET_FLAGS = $(if $(GITHUB_TOKEN),--secret id=github_token$cenv=GITHUB_TOKEN,)
 
 # --- Internal Variables -------------------------------------------------------
 
@@ -83,12 +93,8 @@ $(OUTPUT_DIR)/$(HOST_ARTIFACT_NAME): verify-trivy-version verify-trivy-checksums
 	@echo "--- Building Python $(PYTHON_VERSION) Image ($(ARCH)) ---"
 	@echo "    Security Gate: CRIT=$(FAIL_ON_CRITICAL) HIGH=$(FAIL_ON_HIGH)"
 	$(Q)cd python-versions && \
-		secret_flags=""; \
-		if [ -n "$${GITHUB_TOKEN:-}" ]; then \
-			secret_flags="--secret id=github_token,env=GITHUB_TOKEN"; \
-		fi; \
-		DOCKER_BUILDKIT=1 $(CONTAINER_ENGINE) build \
-			$$secret_flags \
+		$(CONTAINER_ENGINE) build \
+			$(DOCKER_SECRET_FLAGS) \
 		--network=host \
 		--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
 		--build-arg ACTIONS_PYTHON_VERSIONS=$(ACTIONS_PYTHON_VERSIONS) \
@@ -158,12 +164,8 @@ update-trivy-pins:
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
 	$(Q)cd $(PS_DIR) && \
-		secret_flags=""; \
-		if [ -n "$${GITHUB_TOKEN:-}" ]; then \
-			secret_flags="--secret id=github_token,env=GITHUB_TOKEN"; \
-		fi; \
 		$(CONTAINER_ENGINE) build \
-			$$secret_flags \
+			$(DOCKER_SECRET_FLAGS) \
 		--network=host \
 		--build-arg POWERSHELL_VERSION=$(POWERSHELL_VERSION) \
 		--build-arg POWERSHELL_NATIVE_VERSION=$(POWERSHELL_NATIVE_VERSION) \
