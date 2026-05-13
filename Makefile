@@ -157,7 +157,13 @@ update-trivy-pins:
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
-	$(Q)cd $(PS_DIR) && $(CONTAINER_ENGINE) build \
+	$(Q)cd $(PS_DIR) && \
+		secret_flags=""; \
+		if [ -n "$${GITHUB_TOKEN:-}" ]; then \
+			secret_flags="--secret id=github_token,env=GITHUB_TOKEN"; \
+		fi; \
+		$(CONTAINER_ENGINE) build \
+			$$secret_flags \
 		--network=host \
 		--build-arg POWERSHELL_VERSION=$(POWERSHELL_VERSION) \
 		--build-arg POWERSHELL_NATIVE_VERSION=$(POWERSHELL_NATIVE_VERSION) \
