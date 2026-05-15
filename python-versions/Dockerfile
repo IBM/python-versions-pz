@@ -2,9 +2,11 @@
 ARG UBUNTU_VERSION=24.04
 ARG BASE_IMAGE=powershell:ubuntu-${UBUNTU_VERSION}
 ARG TARGETARCH
-ARG PYTHON_VERSION=3.13.3
-ARG ACTIONS_PYTHON_VERSIONS=3.13.3-14344076652
+<<<<<<< HEAD
+ARG PYTHON_VERSION=3.14.5
+ARG ACTIONS_PYTHON_VERSIONS=3.14.5-25647354415
 ARG TRIVY_VERSION=v0.70.0  # default should match .trivyversion in repo root
+>>>>>>> 9c96fcc (Resolve upstream Python build tag)
 
 # ================= BUILDER STAGE =====================
 FROM ${BASE_IMAGE} AS builder
