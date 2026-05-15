@@ -300,6 +300,24 @@ class TestDownloadFile:
         mock_copy.assert_called_once()
 
     @patch('urllib.request.urlopen')
+    @patch('shutil.copyfileobj')
+    def test_download_file_uses_github_token_file(self, mock_copy, mock_urlopen, temp_file, tmp_path):
+        """Test download_file sends the GitHub token from a file when available."""
+        token_file = tmp_path / "token.txt"
+        token_file.write_text("ghs_file_token\n", encoding="utf-8")
+
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {"Content-Type": "application/gzip"}
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN_FILE": str(token_file)}, clear=False):
+            download_file("https://example.com/file.tar.gz", temp_file)
+
+        request = mock_urlopen.call_args[0][0]
+        assert request.get_header("Authorization") == "Bearer ghs_file_token"
+
+    @patch('urllib.request.urlopen')
     def test_download_file_http_error(self, mock_urlopen):
         """Test download with HTTP error."""
         mock_response = MagicMock()
@@ -371,6 +389,20 @@ class TestFetchJson:
 
         result = fetch_json("https://api.github.com/repos/test/test/releases")
         assert result == test_data
+
+    @patch.dict(os.environ, {"GITHUB_TOKEN": "ghs_test_token"}, clear=False)
+    @patch('urllib.request.urlopen')
+    def test_fetch_json_uses_github_token(self, mock_urlopen):
+        """Test fetch_json sends the GitHub token when it is available."""
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.read.return_value = json.dumps([]).encode()
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        fetch_json("https://api.github.com/repos/test/test/releases")
+
+        request = mock_urlopen.call_args[0][0]
+        assert request.get_header("Authorization") == "Bearer ghs_test_token"
 
     @patch('urllib.request.urlopen')
     def test_fetch_json_http_error(self, mock_urlopen):

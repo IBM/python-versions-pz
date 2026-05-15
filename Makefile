@@ -21,7 +21,7 @@ endif
 # Versioning
 PYTHON_VERSION          ?= 3.13.3
 ACTIONS_PYTHON_VERSIONS ?= 3.15.0-alpha.5-21016111327
-POWERSHELL_VERSION      ?= v7.5.2
+POWERSHELL_VERSION      ?= v7.6.1
 POWERSHELL_NATIVE_VERSION ?= v7.4.0
 UBUNTU_VERSION          ?= 24.04
 TRIVY_VERSION_FILE      ?= .trivyversion
@@ -160,7 +160,13 @@ update-trivy-pins:
 # 3. Build Base PowerShell Image
 powershell: $(PS_PREREQS)
 	@echo "--- Building PowerShell Base Image ---"
-	$(Q)cd $(PS_DIR) && $(CONTAINER_ENGINE) build \
+	$(Q)cd $(PS_DIR) && \
+		secret_flags=""; \
+		if [ -n "$${GITHUB_TOKEN:-}" ]; then \
+			secret_flags="--secret id=github_token,env=GITHUB_TOKEN"; \
+		fi; \
+		DOCKER_BUILDKIT=1 $(CONTAINER_ENGINE) build \
+			$$secret_flags \
 		--network=host \
 		--build-arg POWERSHELL_VERSION=$(POWERSHELL_VERSION) \
 		--build-arg POWERSHELL_NATIVE_VERSION=$(POWERSHELL_NATIVE_VERSION) \
