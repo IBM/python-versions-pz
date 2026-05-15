@@ -17,6 +17,7 @@ import urllib.request
 import urllib.error
 import bisect
 import time
+from pathlib import Path
 from typing import Optional, List, Tuple, NamedTuple
 
 # Third-party imports
@@ -29,8 +30,36 @@ INSTALL_DIR = "/usr/share/dotnet"
 NUGET_PACKAGE = "microsoft.netcore.app.runtime.linux-x64"
 FETCH_MAX_RETRIES = 8
 FETCH_RETRY_DELAY = 5
+GITHUB_TOKEN_ENV = "GITHUB_TOKEN"
+GITHUB_TOKEN_FILE_ENV = "GITHUB_TOKEN_FILE"
+GITHUB_USER_AGENT = "python-versions-pz-dotnet-install"
 
 app = typer.Typer()
+
+def get_github_token() -> str:
+    token = os.getenv(GITHUB_TOKEN_ENV, "").strip()
+    if token:
+        return token
+
+    token_file = os.getenv(GITHUB_TOKEN_FILE_ENV, "").strip()
+    if token_file:
+        try:
+            return Path(token_file).read_text(encoding="utf-8").strip()
+        except Exception:
+            return ""
+
+    return ""
+
+def build_request(url: str, accept: Optional[str] = None) -> urllib.request.Request:
+    headers = {"User-Agent": GITHUB_USER_AGENT}
+    if accept:
+        headers["Accept"] = accept
+
+    token = get_github_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    return urllib.request.Request(url, headers=headers)
 
 def get_nuget_versions(package: str) -> List[str]:
     """Fetch official .NET runtime versions from NuGet.org."""
@@ -179,7 +208,8 @@ def fetch_json(url: str) -> List[dict]:
     """Download and parse JSON response from a given URL with basic retries."""
     for attempt in range(FETCH_MAX_RETRIES):
         try:
-            with urllib.request.urlopen(url) as response:
+            request = build_request(url, "application/vnd.github+json")
+            with urllib.request.urlopen(request) as response:
                 if response.status >= 400:
                     raise typer.Exit(f"❌ Failed to fetch {url}")
                 return json.loads(response.read())
@@ -257,7 +287,8 @@ def select_tag_interactive(tags: List[dict], filter_prefix: Optional[str]) -> st
 
 def download_file(url: str, dest_path: str) -> None:
     """Download a file from a URL to a destination path."""
-    with urllib.request.urlopen(url) as response:
+    request = build_request(url)
+    with urllib.request.urlopen(request) as response:
         if response.status >= 400:
             raise typer.Exit(f"❌ Failed to download {url}")
         if "html" in response.headers.get("Content-Type", "").lower():
