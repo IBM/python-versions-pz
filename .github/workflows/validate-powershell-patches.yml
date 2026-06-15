@@ -1,0 +1,146 @@
+name: Validate PowerShell Patches
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC — catch stale patches early in the week
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One validation run at a time — builds are expensive on self-hosted runners
+concurrency:
+  group: validate-powershell-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      powershell_version: ${{ steps.versions.outputs.powershell_version }}
+      powershell_native_version: ${{ steps.versions.outputs.powershell_native_version }}
+      ubuntu_version: ${{ steps.versions.outputs.ubuntu_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Resolve PowerShell versions
+        id: versions
+        run: |
+          # 1. PowerShell version: override file takes priority, then Makefile default
+          OVERRIDE_FILE=".github/release/powershell-tag-override.txt"
+          MAKEFILE_DEFAULT=$(grep -oP 'POWERSHELL_VERSION\s+\?=\s+\K\S+' Makefile)
+
+          if [ -f "$OVERRIDE_FILE" ] && [ -s "$OVERRIDE_FILE" ]; then
+            PS_VER=$(head -n1 "$OVERRIDE_FILE" | tr -d '[:space:]')
+            echo "Using override PowerShell version: $PS_VER"
+          else
+            PS_VER="$MAKEFILE_DEFAULT"
+            echo "No override found, using Makefile default: $PS_VER"
+          fi
+
+          # 2. Native version from Makefile
+          NATIVE_VER=$(grep -oP 'POWERSHELL_NATIVE_VERSION\s+\?=\s+\K\S+' Makefile)
+          echo "Native version: $NATIVE_VER"
+
+          # 3. Ubuntu version from Makefile
+          UBUNTU_VER=$(grep -oP 'UBUNTU_VERSION\s+\?=\s+\K\S+' Makefile)
+          echo "Ubuntu version: $UBUNTU_VER"
+
+          # Export outputs
+          echo "powershell_version=$PS_VER" >> "$GITHUB_OUTPUT"
+          echo "powershell_native_version=$NATIVE_VER" >> "$GITHUB_OUTPUT"
+          echo "ubuntu_version=$UBUNTU_VER" >> "$GITHUB_OUTPUT"
+
+  build-powershell:
+    needs: resolve-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: ppc64le
+            runner: ubuntu-24.04-ppc64le
+          - arch: s390x
+            runner: ubuntu-24.04-s390x
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Ensure Docker CLI is available
+        run: |
+          if ! command -v docker > /dev/null; then
+            sudo apt-get update && sudo apt-get install -y docker.io
+          fi
+          if command -v systemctl > /dev/null; then
+            sudo systemctl start docker || true
+          elif command -v service > /dev/null; then
+            sudo service docker start || true
+          fi
+
+      - name: Verify prerequisite patch files exist
+        run: |
+          PS_VER="${{ needs.resolve-versions.outputs.powershell_version }}"
+          NATIVE_VER="${{ needs.resolve-versions.outputs.powershell_native_version }}"
+          ARCH="${{ matrix.arch }}"
+
+          echo "Checking prerequisites for $PS_VER on $ARCH..."
+
+          # Main PowerShell patch
+          PATCH="PowerShell/patch/powershell-${ARCH}-${PS_VER}.patch"
+          if [ ! -f "$PATCH" ]; then
+            echo "❌ Missing: $PATCH"
+            exit 1
+          fi
+          echo "✅ Found: $PATCH"
+
+          # Native patch
+          NATIVE_PATCH="PowerShell/patch/powershell-native-${NATIVE_VER}.patch"
+          if [ ! -f "$NATIVE_PATCH" ]; then
+            echo "❌ Missing: $NATIVE_PATCH"
+            exit 1
+          fi
+          echo "✅ Found: $NATIVE_PATCH"
+
+          # Gen tarball
+          GEN_TAR="PowerShell/patch/powershell-gen-${PS_VER}.tar.gz"
+          if [ ! -f "$GEN_TAR" ]; then
+            echo "❌ Missing: $GEN_TAR"
+            exit 1
+          fi
+          # Validate tarball integrity
+          if ! tar -tzf "$GEN_TAR" > /dev/null 2>&1; then
+            echo "❌ Corrupt tarball: $GEN_TAR"
+            exit 1
+          fi
+          echo "✅ Valid: $GEN_TAR"
+
+          echo "All prerequisite files present and valid."
+
+      - name: Build PowerShell image
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          PS_VER="${{ needs.resolve-versions.outputs.powershell_version }}"
+          NATIVE_VER="${{ needs.resolve-versions.outputs.powershell_native_version }}"
+          UBUNTU_VER="${{ needs.resolve-versions.outputs.ubuntu_version }}"
+          ARCH="${{ matrix.arch }}"
+
+          echo "Building PowerShell $PS_VER for $ARCH on Ubuntu $UBUNTU_VER..."
+          make CONTAINER_ENGINE="sudo docker" \
+            POWERSHELL_VERSION="$PS_VER" \
+            POWERSHELL_NATIVE_VERSION="$NATIVE_VER" \
+            UBUNTU_VERSION="$UBUNTU_VER" \
+            powershell
+
+      - name: Verify pwsh binary
+        run: |
+          PS_VER="${{ needs.resolve-versions.outputs.powershell_version }}"
+          ARCH="${{ matrix.arch }}"
+
+          docker run --rm powershell:ubuntu-24.04 pwsh --version || {
+            echo "❌ pwsh --version failed for $ARCH / $PS_VER"
+            exit 1
+          }
+          echo "✅ pwsh --version succeeded for $ARCH / $PS_VER"
