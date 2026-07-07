@@ -60,6 +60,10 @@ coverage.xml
 # Manifest and output
 python-versions/output/
 
+# Metrics collector outputs
+metrics-output/
+.metrics-intermediate/
+
 # OS files
 .DS_Store
 Thumbs.db

@@ -5,7 +5,9 @@ description = "Automates building and release of CPython tarballs for ppc64le an
 authors = ["Adilhusain Shaikh <Adilhusain.Shaikh@ibm.com>", "Your Name or Organization"]
 license = "Apache-2.0"
 readme = "README.md"
-package-mode = false
+packages = [
+    { include = "metrics_collector" },
+]
 
 classifiers = [
 	"License :: OSI Approved :: Apache Software License",
@@ -16,7 +18,8 @@ classifiers = [
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
 	"Intended Audience :: Developers",
-	"Topic :: Software Development :: Build Tools"
+	"Topic :: Software Development :: Build Tools",
+	"Topic :: Software Development :: Metrics",
 ]
 
 
@@ -32,6 +35,9 @@ pytest = "^7.4.3"
 pytest-cov = "^7.0.0"
 pytest-mock = "^3.12.0"
 requests-mock = "^1.11.0"
+
+[tool.poetry.scripts]
+metrics-collector = "metrics_collector.cli:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
