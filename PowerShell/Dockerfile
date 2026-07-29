@@ -73,7 +73,7 @@ RUN cd /PowerShell/src/powershell-unix && \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
       -p:PublishReadyToRun=false \
-      -p:WarnAsError=false \
+      -p:TreatWarningsAsErrors=false \
       -p:RunAnalyzers=false \
       -p:SDKToUse=Microsoft.NET.Sdk \
       -p:NoWarn=NU1903 \
