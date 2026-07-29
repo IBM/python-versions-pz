@@ -67,8 +67,8 @@ RUN --mount=type=secret,id=github_token,required=false \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
 RUN cd /PowerShell/src/powershell-unix && \
-    dotnet restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false -p:NoWarn=NU1903 && \
-    dotnet publish . \
+    dotnet restore --source https://api.nuget.org/v3/index.json --runtime linux-$(uname -m) -p:NuGetAudit=false && \
+    dotnet publish . --no-restore \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
@@ -76,7 +76,6 @@ RUN cd /PowerShell/src/powershell-unix && \
       -p:TreatWarningsAsErrors=false \
       -p:RunAnalyzers=false \
       -p:SDKToUse=Microsoft.NET.Sdk \
-      -p:WarningsNotAsErrors="NU1901;NU1902;NU1903;NU1904" \
       --self-contained \
       --configuration Release \
       --framework net$(dotnet --version | cut -d. -f1,2) \
