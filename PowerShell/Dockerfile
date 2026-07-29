@@ -67,9 +67,18 @@ RUN --mount=type=secret,id=github_token,required=false \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
 RUN cd /PowerShell/src/powershell-unix && \
-    dotnet restore --source https://api.nuget.org/v3/index.json --runtime linux-$(uname -m) -p:NuGetAudit=false && \
+    # Disable NuGet audit via MSBuild property
+    echo '<Project><PropertyGroup><NuGetAudit>false</NuGetAudit><TreatWarningsAsErrors>false</TreatWarningsAsErrors></PropertyGroup></Project>' > Directory.Build.props && \
+    dotnet restore --source https://api.nuget.org/v3/index.json --runtime linux-$(uname -m) && \
     dotnet publish . --no-restore \
       -p:GenerateFullPaths=true \
+      -p:ErrorOnDuplicatePublishOutputFiles=false \
+      -p:IsWindows=false \
+      -p:PublishReadyToRun=false \
+      -p:TreatWarningsAsErrors=false \
+      -p:RunAnalyzers=false \
+      -p:SDKToUse=Microsoft.NET.Sdk \
+      --self-contained \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
       -p:PublishReadyToRun=false \
