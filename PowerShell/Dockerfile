@@ -68,7 +68,7 @@ RUN --mount=type=secret,id=github_token,required=false \
 
 RUN cd /PowerShell/src/powershell-unix && \
     dotnet restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false -p:NoWarn=NU1903 && \
-    dotnet publish . --no-restore \
+    dotnet publish . \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
