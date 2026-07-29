@@ -67,16 +67,16 @@ RUN --mount=type=secret,id=github_token,required=false \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
 RUN cd /PowerShell/src/powershell-unix && \
-    # Disable NuGet audit globally via Directory.Build.props
-    printf '<Project>\n  <PropertyGroup>\n    <NuGetAudit>false</NuGetAudit>\n    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>\n  </PropertyGroup>\n</Project>\n' > Directory.Build.props && \
-    dotnet restore --source https://api.nuget.org/v3/index.json && \
+    dotnet restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false -p:NoWarn=NU1903 && \
     dotnet publish . \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
       -p:PublishReadyToRun=false \
+      -p:TreatWarningsAsErrors=false \
       -p:RunAnalyzers=false \
       -p:SDKToUse=Microsoft.NET.Sdk \
+      -p:WarningsNotAsErrors="NU1901;NU1902;NU1903;NU1904" \
       --self-contained \
       --configuration Release \
       --framework net$(dotnet --version | cut -d. -f1,2) \
