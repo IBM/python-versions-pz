@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.6
+
 ARG UBUNTU_VERSION=24.04
 ARG TARGETARCH
 ARG POWERSHELL_VERSION=v7.5.1
@@ -5,9 +7,12 @@ ARG POWERSHELL_VERSION=v7.5.1
 # Base stage for reuse
 FROM ubuntu:${UBUNTU_VERSION} AS base
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 RUN apt-get -qq update && \
-    apt-get -qq install -y git curl ca-certificates && \
+    apt-get -qq install -y git curl ca-certificates locales && \
+    locale-gen C.UTF-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Build libpsl-native using base
@@ -48,12 +53,13 @@ COPY patch/powershell-gen-${POWERSHELL_VERSION}.tar.gz /tmp/
 COPY update-dotnet-sdk-and-tfm.sh /tmp/
 COPY dotnet-install.py /tmp/
 
-RUN chmod +x /tmp/update-dotnet-sdk-and-tfm.sh && \
+RUN --mount=type=secret,id=github_token,required=false \
+    chmod +x /tmp/update-dotnet-sdk-and-tfm.sh && \
     git clone https://github.com/PowerShell/PowerShell.git /PowerShell && \
     cd /PowerShell && \
     git checkout tags/${POWERSHELL_VERSION} -b ${TARGETARCH}-${POWERSHELL_VERSION} && \
     SDK_VERSION=$(python3 -c "import json; print(json.load(open('global.json'))['sdk']['version'])") && \
-    python3 /tmp/dotnet-install.py --tag $SDK_VERSION && \
+    GITHUB_TOKEN_FILE=/run/secrets/github_token python3 /tmp/dotnet-install.py --tag $SDK_VERSION && \
     ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
     git apply /tmp/powershell.patch && \
     cp /tmp/update-dotnet-sdk-and-tfm.sh . && \
