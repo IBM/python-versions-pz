@@ -146,23 +146,11 @@ jobs:
           esac
           echo "rid_arch=$rid_arch" >> $GITHUB_OUTPUT
 
-      - name: Patch csproj to suppress NuGet audit and treat-warnings-as-errors
-        run: |
-          find pwsh-src/src -name '*.csproj' -exec sh -c '
-            for f; do
-              sed -i "/<TreatWarningsAsErrors>/d" "$f"
-              sed -i "0,/<PropertyGroup>/s//<PropertyGroup>\n    <NuGetAudit>false<\/NuGetAudit>/" "$f"
-              # Also handle cases where warnings as errors is set via property
-              sed -i "s/<TreatWarningsAsErrors>true<\/TreatWarningsAsErrors>//g" "$f"
-              sed -i "s/<WarningsAsErrors>/# /" "$f"
-            done
-          ' sh {} +
-
       - name: Build PowerShell with dotnet
         run: |
           cd pwsh-src/src/powershell-unix
           framework_ver=$("$HOME/.dotnet/dotnet" --version | cut -d. -f1,2)
-          "$HOME/.dotnet/dotnet" restore --source https://api.nuget.org/v3/index.json
+          NugetSecurityAnalysisWarningLevel=none "$HOME/.dotnet/dotnet" restore --source https://api.nuget.org/v3/index.json
           "$HOME/.dotnet/dotnet" publish . \
             -p:GenerateFullPaths=true \
             -p:ErrorOnDuplicatePublishOutputFiles=false \
