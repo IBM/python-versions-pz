@@ -150,7 +150,7 @@ jobs:
         run: |
           cd pwsh-src/src/powershell-unix
           framework_ver=$("$HOME/.dotnet/dotnet" --version | cut -d. -f1,2)
-          NugetSecurityAnalysisWarningLevel=none "$HOME/.dotnet/dotnet" restore --source https://api.nuget.org/v3/index.json
+          "$HOME/.dotnet/dotnet" restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false
           "$HOME/.dotnet/dotnet" publish . \
             -p:GenerateFullPaths=true \
             -p:ErrorOnDuplicatePublishOutputFiles=false \

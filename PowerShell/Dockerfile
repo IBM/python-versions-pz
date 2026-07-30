@@ -67,7 +67,7 @@ RUN --mount=type=secret,id=github_token,required=false \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
 RUN cd /PowerShell/src/powershell-unix && \
-    NugetSecurityAnalysisWarningLevel=none dotnet restore --source https://api.nuget.org/v3/index.json && \
+    dotnet restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false && \
     dotnet publish . \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
