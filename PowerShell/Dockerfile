@@ -66,8 +66,9 @@ RUN --mount=type=secret,id=github_token,required=false \
     ./update-dotnet-sdk-and-tfm.sh -g && \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
-RUN cd /PowerShell/src/powershell-unix && \
-    dotnet restore --source https://api.nuget.org/v3/index.json -p:NuGetAudit=false && \
+RUN export NuGetAudit=false && \
+    cd /PowerShell/src/powershell-unix && \
+    dotnet restore --source https://api.nuget.org/v3/index.json && \
     dotnet publish . \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
