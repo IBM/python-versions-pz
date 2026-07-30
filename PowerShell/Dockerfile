@@ -48,7 +48,7 @@ RUN apt-get -qq update && \
 
 COPY --from=native /PowerShell-Native/src/powershell-unix/libpsl-native.so /usr/lib/
 
-COPY patch/powershell-${TARGETARCH}-${POWERSHELL_VERSION}.patch /tmp/powershell.patch
+    COPY patch/powershell-${TARGETARCH}-${POWERSHELL_VERSION}.patch /tmp/powershell.patch
 COPY patch/powershell-gen-${POWERSHELL_VERSION}.tar.gz /tmp/
 COPY update-dotnet-sdk-and-tfm.sh /tmp/
 COPY dotnet-install.py /tmp/
@@ -64,18 +64,16 @@ RUN --mount=type=secret,id=github_token,required=false \
     git apply /tmp/powershell.patch && \
     cp /tmp/update-dotnet-sdk-and-tfm.sh . && \
     ./update-dotnet-sdk-and-tfm.sh -g && \
-    tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C . && \
-    find . -name '*.csproj' -exec sed -i '/<TreatWarningsAsErrors>/d' {} + && \
-    find . -name '*.csproj' -exec sed -i '0,/<PropertyGroup>/s/<PropertyGroup>/<PropertyGroup>\n    <NuGetAudit>false<\/NuGetAudit>/' {} +
+    tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
 RUN cd /PowerShell/src/powershell-unix && \
-    dotnet restore --source https://api.nuget.org/v3/index.json --runtime linux-$(uname -m) && \
-    dotnet publish . --no-restore \
+    dotnet restore --source https://api.nuget.org/v3/index.json && \
+    dotnet publish . \
       -p:GenerateFullPaths=true \
       -p:ErrorOnDuplicatePublishOutputFiles=false \
       -p:IsWindows=false \
       -p:PublishReadyToRun=false \
-      -p:TreatWarningsAsErrors=false \
+      -p:WarnAsError=false \
       -p:RunAnalyzers=false \
       -p:SDKToUse=Microsoft.NET.Sdk \
       --self-contained \
@@ -84,6 +82,7 @@ RUN cd /PowerShell/src/powershell-unix && \
       --runtime linux-$(uname -m) && \
     ln -sf /PowerShell/src/powershell-unix/bin/Release/net*/linux-*/publish/pwsh /usr/bin/pwsh && \
     cd /PowerShell && \
+    
     pwsh -Command " \
         Set-Location /PowerShell; \
         Import-Module ./build.psm1 -ArgumentList \$true; \
