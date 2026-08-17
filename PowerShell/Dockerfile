@@ -17,7 +17,7 @@ RUN apt-get -qq update && \
 
 # Build libpsl-native using base
 FROM base AS native
-ARG POWERSHELL_NATIVE_VERSION=v7.4.0
+ARG POWERSHELL_NATIVE_VERSION=v700.0.0
 ARG TARGETARCH
 
 RUN apt-get -qq update && \
