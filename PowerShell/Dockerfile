@@ -2,7 +2,7 @@
 
 ARG UBUNTU_VERSION=24.04
 ARG TARGETARCH
-ARG POWERSHELL_VERSION=v7.5.1
+ARG POWERSHELL_VERSION=v7.6.4
 
 # Base stage for reuse
 FROM ubuntu:${UBUNTU_VERSION} AS base
@@ -66,7 +66,8 @@ RUN --mount=type=secret,id=github_token,required=false \
     ./update-dotnet-sdk-and-tfm.sh -g && \
     tar -xzf /tmp/powershell-gen-${POWERSHELL_VERSION}.tar.gz -C .
 
-RUN cd /PowerShell/src/powershell-unix && \
+RUN export NuGetAudit=false && \
+    cd /PowerShell/src/powershell-unix && \
     dotnet restore --source https://api.nuget.org/v3/index.json && \
     dotnet publish . \
       -p:GenerateFullPaths=true \
