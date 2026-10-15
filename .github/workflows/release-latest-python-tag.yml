@@ -64,7 +64,7 @@ jobs:
       arch: ${{ matrix.arch }}
       tag: ${{ needs.get-latest-tag.outputs.latest_tag }}
       platform-version: ${{ matrix.platform-version }}
-      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'], matrix.arch) }}
+      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'] == '26.04' && '24.04' || matrix['platform-version'], matrix.arch) }}
 
   release-asset:
     needs: [build-and-release-matrix, get-latest-tag]

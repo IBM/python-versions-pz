@@ -108,7 +108,7 @@ jobs:
       arch: ${{ matrix.arch }}
       tag: ${{ matrix.tag }}
       platform-version: ${{ matrix['platform-version'] }}
-      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'], matrix.arch) }}
+      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'] == '26.04' && '24.04' || matrix['platform-version'], matrix.arch) }}
 
 
   release-assets:
