@@ -101,7 +101,7 @@ jobs:
       max-parallel: 8 # Reduce concurrent jobs to limit load on runners
       matrix:
         tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
-        platform-version: ['24.04', '22.04']
+        platform-version: ['26.04', '24.04', '22.04']
         arch: ['s390x', 'ppc64le']
     uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
     with:

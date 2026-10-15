@@ -19,7 +19,7 @@ else
 endif
 
 # Versioning
-PYTHON_VERSION          ?= 3.14.5
+PYTHON_VERSION          ?= 3.15.0
 # Auto-resolve from upstream releases unless explicitly overridden.
 # To pin a specific tag: make ACTIONS_PYTHON_VERSIONS=3.14.4-25113653268 ...
 ACTIONS_PYTHON_VERSIONS ?= $(shell ./scripts/resolve-upstream-tag.sh $(PYTHON_VERSION))
