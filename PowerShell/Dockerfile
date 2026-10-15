@@ -33,7 +33,7 @@ RUN git clone https://github.com/PowerShell/PowerShell-Native.git /PowerShell-Na
     git apply /tmp/powershell-native-${POWERSHELL_NATIVE_VERSION}.patch && \
     git submodule update --init && \
     cd src/libpsl-native && \
-    cmake -DCMAKE_BUILD_TYPE=Debug . && \
+    cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Debug . && \
     make && \
     (make test || cat Testing/Temporary/LastTest.log || true)
 
