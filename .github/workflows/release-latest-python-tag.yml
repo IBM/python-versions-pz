@@ -93,6 +93,10 @@ jobs:
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # Check out the current branch head, not the commit that triggered the run.
+          # Re-runs reuse the original commit, which may be missing manifest commits
+          # pushed by earlier attempts.
+          ref: ${{ github.ref_name }}
 
       - name: Download partial manifest artifacts # Pull the short-lived JSON blobs produced by the release job
         continue-on-error: true # Missing artifacts just mean no new manifests
@@ -136,7 +140,9 @@ jobs:
       - name: Push manifest updates
         if: steps.commit_manifests.outputs.committed == 'true'
         run: |
-          # Keep freshly generated manifest files if a conflict arises
-          git pull --rebase --strategy=recursive --strategy-option=ours
+          # During a rebase "theirs" is the commit being replayed (our generated
+          # manifests) and "ours" is the upstream branch, so use "theirs" to keep
+          # the freshly generated manifest files if a conflict arises.
+          git pull --rebase --strategy=recursive --strategy-option=theirs
           git push
 
