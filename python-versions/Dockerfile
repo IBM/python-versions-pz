@@ -40,7 +40,7 @@ RUN apt-get -qq update -y && \
     tzdata curl wget gcc g++ make git ca-certificates \
     build-essential libssl-dev libffi-dev zlib1g-dev jq \
     libbz2-dev libreadline-dev libsqlite3-dev liblzma-dev \
-    libncurses-dev libgdbm-dev uuid-dev python3-tk tk-dev && \
+    libncurses-dev libgdbm-dev uuid-dev python3-tk tk-dev libcrypt-dev && \
     ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
     (apt-get -y install --no-install-recommends \

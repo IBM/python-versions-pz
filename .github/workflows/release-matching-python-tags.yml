@@ -101,14 +101,14 @@ jobs:
       max-parallel: 8 # Reduce concurrent jobs to limit load on runners
       matrix:
         tag: ${{ fromJson(needs.get-tags.outputs.tags_json) }}
-        platform-version: ['24.04', '22.04']
+        platform-version: ['26.04', '24.04', '22.04']
         arch: ['s390x', 'ppc64le']
     uses: ./.github/workflows/reusable-build-and-release-python-versions.yml
     with:
       arch: ${{ matrix.arch }}
       tag: ${{ matrix.tag }}
       platform-version: ${{ matrix['platform-version'] }}
-      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'], matrix.arch) }}
+      runner-label: ${{ format('ubuntu-{0}-{1}', matrix['platform-version'] == '26.04' && '24.04' || matrix['platform-version'], matrix.arch) }}
 
 
   release-assets:

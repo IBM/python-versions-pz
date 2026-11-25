@@ -404,8 +404,9 @@ class TestFetchJson:
         request = mock_urlopen.call_args[0][0]
         assert request.get_header("Authorization") == "Bearer ghs_test_token"
 
+    @patch('time.sleep')
     @patch('urllib.request.urlopen')
-    def test_fetch_json_http_error(self, mock_urlopen):
+    def test_fetch_json_http_error(self, mock_urlopen, mock_sleep):
         """Test fetch with HTTP error."""
         mock_response = MagicMock()
         mock_response.status = 404
